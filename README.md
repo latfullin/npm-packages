@@ -19,11 +19,25 @@ npm-packages/
 │       ├── package.json
 │       └── README.md     # публикуется на npm вместе с пакетом
 └── site/
-    ├── .vitepress/
-    │   ├── config.ts                       # меню, боковая панель
-    │   └── theme/components/PackageDemo.vue  # демо с выбором версии
-    ├── index.md          # главная
-    └── tinyval/index.md  # страница пакета
+    ├── [page].md                             # единственный шаблон: из него создаются все страницы
+    ├── [page].paths.ts                       # список страниц сайта на всех языках
+    ├── content/                              # тексты страниц — по одному файлу на страницу
+    │   ├── index.ts                          # список пакетов на сайте
+    │   ├── types.ts
+    │   └── tinyval/
+    │       ├── meta.ts                       # разделы меню и заголовки страниц
+    │       ├── index.md                      # вводная страница
+    │       └── guide/, api/, schemas/, actions/
+    └── .vitepress/
+        ├── config.ts                         # языки, меню и поиск собираются из lang-файлов и meta.ts
+        ├── docs/content.ts                   # сборка страниц из content/ для каждого языка
+        ├── i18n/                             # lang-файлы: тексты интерфейса сайта
+        │   ├── index.ts                      # список языков
+        │   ├── ru.ts, en.ts, zh.ts
+        │   └── types.ts                      # какие тексты должны быть в lang-файле
+        └── theme/components/
+            ├── PackageDemo.vue               # демо с выбором версии (общее для всех пакетов)
+            └── TinyvalDemo.vue               # демо tinyval
 ```
 
 ## Команды
@@ -109,19 +123,50 @@ git push --follow-tags
    ```
 4. Подключить к сайту:
    - в `site/package.json` добавить в `dependencies`: `"<имя>": "*"`;
-   - в `site/.vitepress/config.ts` добавить пункт в `nav` и `sidebar`;
-   - создать страницу `site/<имя>/index.md` с демо:
-     ```md
-     <script setup>
-     import pkg from '<имя>/package.json';
-     const loadLocal = () => import('<имя>');
-     </script>
-
-     <PackageDemo name="<имя>" :local-version="pkg.version" :load-local="loadLocal" v-slot="{ lib }">
-       …демо, использующее lib…
-     </PackageDemo>
-     ```
+   - создать `site/content/<имя>/meta.ts` (разделы и страницы, по образцу `tinyval/meta.ts`) и страницы `.md`;
+   - добавить пакет в `site/content/index.ts` — он появится в меню, на главной и во всех языках;
+   - для демо — компонент в `site/.vitepress/theme/components/` на основе `PackageDemo` (пример — `TinyvalDemo.vue`), зарегистрировать в `theme/index.ts` и вставить в `index.md` пакета.
 5. Выполнить `npm install` в корне.
+
+## Языки сайта
+
+Сайт один: все страницы создаются из одного шаблона `site/[page].md`. Языки — русский (по умолчанию, без префикса в URL), английский (`/en/`) и китайский (`/zh/`).
+
+- **Интерфейс** (меню, кнопки, поиск, заголовки «Сигнатура», «Примеры»…) — lang-файлы `site/.vitepress/i18n/<код>.ts`.
+- **Тексты страниц** — один файл на страницу в `site/content/`. Общие части (код, сигнатуры) пишутся один раз, тексты — в языковых блоках:
+
+  ````md
+  ::: ru
+  Проверяет данные и возвращает их…
+  :::
+
+  ::: en
+  Validates data and returns it…
+  :::
+
+  ## @t(signature)
+
+  ```ts
+  function parse(schema, value): Infer<S>
+  ```
+  ````
+
+  - `@t(signature)` — текст из раздела `docs` lang-файла.
+  - Ссылки внутри пакета пишутся как `[validate](~/api/validate)` — префикс языка подставится сам.
+  - Если блока для языка нет, показывается английский текст.
+- **Заголовки страниц и разделов меню** — `site/content/<пакет>/meta.ts`.
+- **Сообщения об ошибках в пакете** — локали `packages/tinyval/src/locales/<код>.ts`.
+
+В dev-режиме правки в `content/` подхватываются сразу, без перезапуска.
+
+### Добавить язык
+
+1. Скопировать `site/.vitepress/i18n/en.ts` в `site/.vitepress/i18n/<код>.ts` и перевести. TypeScript подскажет, если какой-то текст пропущен.
+2. Добавить язык в список `langs` в `site/.vitepress/i18n/index.ts`.
+
+После этого весь сайт уже доступен на новом языке: интерфейс переведён, а тексты страниц — английские. Дальше постепенно добавляйте блоки `::: <код>` в страницы `site/content/` и переводы заголовков в `meta.ts`.
+
+По желанию — локаль сообщений пакета: `packages/tinyval/src/locales/<код>.ts`, строка в `exports` в `package.json` и в `TinyvalDemo.vue`.
 
 ## Важно
 

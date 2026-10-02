@@ -1,6 +1,8 @@
 <script setup lang="ts">
 // Демо пакета с выбором версии: локальная сборка из packages/ или любой релиз с npm
-import { ref, shallowRef, watch, onMounted } from 'vue';
+import { ref, shallowRef, watch, onMounted, computed } from 'vue';
+import { useData } from 'vitepress';
+import { langByHtmlLang } from '../../i18n';
 
 const props = defineProps<{
   name: string;
@@ -9,6 +11,9 @@ const props = defineProps<{
 }>();
 
 const LOCAL = 'local';
+
+const { lang } = useData();
+const t = computed(() => langByHtmlLang(lang.value).demo);
 
 const versions = ref<string[]>([]);
 const selected = ref(LOCAL);
@@ -41,7 +46,7 @@ async function load(version: string) {
         : await import(/* @vite-ignore */ `https://cdn.jsdelivr.net/npm/${props.name}@${version}/+esm`);
   } catch (e) {
     lib.value = null;
-    error.value = `Не удалось загрузить ${props.name}@${version}: ${(e as Error).message}`;
+    error.value = `${t.value.failed} ${props.name}@${version}: ${(e as Error).message}`;
   } finally {
     loading.value = false;
   }
@@ -59,16 +64,16 @@ onMounted(() => {
   <div class="package-demo">
     <div class="package-demo__bar">
       <label>
-        Версия
+        {{ t.version }}
         <select v-model="selected">
-          <option :value="LOCAL">локальная ({{ localVersion }})</option>
+          <option :value="LOCAL">{{ t.local }} ({{ localVersion }})</option>
           <option v-for="v in versions" :key="v" :value="v">{{ v }}</option>
         </select>
       </label>
-      <span v-if="!published" class="package-demo__note">пакет ещё не опубликован на npm</span>
+      <span v-if="!published" class="package-demo__note">{{ t.unpublished }}</span>
     </div>
 
-    <p v-if="loading">Загрузка…</p>
+    <p v-if="loading">{{ t.loading }}</p>
     <p v-else-if="error" class="package-demo__error">{{ error }}</p>
     <div v-else-if="lib" class="package-demo__body">
       <slot :lib="lib" :version="selected === LOCAL ? localVersion : selected" />
