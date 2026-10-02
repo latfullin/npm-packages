@@ -37,6 +37,8 @@ function validateAsync<S extends Schema>(schema: S, value: unknown, options?: Op
 4. Если асинхронная проверка бросила исключение, `validateAsync` тоже отклоняется с ним.
 
 Для схем без асинхронных проверок `validateAsync` тоже работает, просто возвращает `Promise`.
+
+Если заранее неизвестно, есть ли в схеме асинхронные проверки, используйте `validateAny(schema, value, options)`: она возвращает результат сразу, а `Promise` — только когда асинхронные проверки есть. Каждая проверка вызывается один раз.
 :::
 
 ::: en
@@ -58,6 +60,8 @@ A `Promise` with the same result as [`validate`](~/api/validate): `{ valid, data
 4. If an async check throws, `validateAsync` rejects with that error.
 
 `validateAsync` also works for schemas without async checks — it just returns a `Promise`.
+
+If you don't know in advance whether a schema has async checks, use `validateAny(schema, value, options)`: it returns the result right away, and a `Promise` only when there are async checks. Every check is called once.
 :::
 
 ::: zh
@@ -79,6 +83,8 @@ A `Promise` with the same result as [`validate`](~/api/validate): `{ valid, data
 4. 如果异步检查抛出异常，`validateAsync` 也会以该异常拒绝。
 
 没有异步检查的 Schema 同样可以使用 `validateAsync`，只是返回一个 `Promise`。
+
+如果事先不知道 Schema 中是否有异步检查，请使用 `validateAny(schema, value, options)`：它会直接返回结果，只有存在异步检查时才返回 `Promise`。每个检查只调用一次。
 :::
 
 ## @t(example)

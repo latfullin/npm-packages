@@ -2,9 +2,10 @@
 
 Tiny, fast, zero-dependency validation for browser and server.
 
-- ~1.4 kB gzip for a typical form, ~2.3 kB for everything (tree-shakeable)
+- ~1.6 kB gzip for a typical form, ~3.2 kB for everything (tree-shakeable)
 - TypeScript types inferred from the schema
-- Nested objects and arrays, unknown keys handling, coercion, transforms, async checks
+- Nested objects and arrays, unions, unknown keys handling, coercion, transforms, async checks
+- [Standard Schema](https://standardschema.dev) — works with tRPC, Hono, TanStack Form, React Hook Form and more
 
 ## Install
 
@@ -60,11 +61,28 @@ try {
 | `unknown()` | Any value |
 | `object(shape, { unknown })` | `unknown`: `'strip'` (default), `'strict'` or `'passthrough'` |
 | `array(item)` | Array of items |
+| `tuple([a, b])` | Fixed-length array |
+| `record(value)`, `record(key, value)` | Object with arbitrary keys |
+| `union([a, b])` | The first matching schema |
+| `variant(key, [objA, objB])` | Objects selected by a tag field, precise errors |
+| `enumOf(Enum)` | Values of a TypeScript `enum` or an `as const` object |
+| `lazy(() => schema)` | Recursive schemas (trees), protected from too deep input |
 | `optional(schema, default?)` | Value may be missing; default can be a value or a function |
 | `nullable(schema)` | Value may be `null` |
+| `fallback(schema, value)` | Value used instead of an error (query params, settings) |
+| `label(schema, 'Email')` | Field name for `{label}` in messages |
 | `transform(schema, fn)` | Change the output (and its type) |
 | `preprocess(fn, schema)` | Prepare the input before validation |
 | `coerce.string/number/boolean/date()` | Convert strings from query, form-data, env |
+
+## Object helpers
+
+```ts
+const UpdateUser = partial(User);                   // all fields optional (PATCH)
+const Login = pick(User, ['email', 'password']);
+const PublicUser = omit(User, ['password']);
+const Admin = extend(User, { role: oneOf(['admin', 'moderator']) });
+```
 
 ## Pipe actions
 
@@ -90,7 +108,35 @@ const Signup = object({
 const result = await validateAsync(Signup, body);
 ```
 
-Pass `{ all: true }` to collect every error of a field instead of the first one.
+## Options
+
+```ts
+validate(schema, data, {
+  all: true,                    // every error of a field, not only the first
+  messages: ru,                 // messages for this call only (per-request language)
+  labels: { email: 'Email' },   // field names for {label}
+  maxDepth: 256,                // max nesting for lazy()
+});
+```
+
+Every issue has `code`, `message`, `path` and `params` (`{ min: 8 }`) — so the client can translate errors by code.
+
+## Laravel-style errors
+
+`flatten(issues)` returns every message by field: `{ password: ['Must be at least 8 long', 'Invalid format'] }`.
+
+```ts
+const result = validate(User, body, { all: true });
+if (!result.valid) res.status(422).json({ errors: flatten(result.issues) });
+```
+
+## Standard Schema
+
+Every schema implements [Standard Schema](https://standardschema.dev), so it can be passed directly to tRPC, Hono, TanStack Form, React Hook Form and other compatible libraries:
+
+```ts
+app.post('/users', sValidator('json', CreateUser), handler); // Hono
+```
 
 ## Messages
 
@@ -108,7 +154,41 @@ import { setMessages } from 'tinyval';
 import ru from 'tinyval/locales/ru';
 
 setMessages(ru);
-setMessages({ required: 'Please fill in' });
+setMessages({ required: '{label} is required' });
+```
+
+On a server with per-request languages pass `{ messages }` to `validate` instead — it doesn't touch other requests.
+
+## Vue
+
+Form state for Vue 3 (`useForm`: v-model values, errors, submit, server errors) is a separate package — [tinyval-vue](https://www.npmjs.com/package/tinyval-vue).
+
+## Custom lang file
+
+Copy a locale into your project, edit it and load it — like Laravel lang files:
+
+```bash
+npx tinyval lang en            # creates lang/tinyval/en.ts (also: ru, zh; --out <dir>, --js, --force)
+```
+
+```ts
+// lang/tinyval/en.ts
+import type { Messages } from 'tinyval';
+
+export default {
+  required: '{label} is required',
+  'email.required': 'We need your email to send the receipt', // field-specific
+  'items.*.qty.min': 'Quantity must be at least {min}',        // array items
+  // ...all other codes — TypeScript checks that none is missing
+} satisfies Messages;
+```
+
+```ts
+import { setMessages, setLabels } from 'tinyval';
+import messages from './lang/tinyval/en';
+
+setMessages(messages);
+setLabels({ email: 'Email address' }); // names for {label}
 ```
 
 ## Custom rules
@@ -117,6 +197,15 @@ setMessages({ required: 'Please fill in' });
 const even = (msg = 'Must be even') => check<number>((v) => v % 2 === 0, msg);
 
 pipe(number(), even());
+```
+
+A custom schema with `createSchema` (supports Standard Schema too):
+
+```ts
+const bigint = (msg?: Message) =>
+  createSchema<bigint>((value, ctx, path) =>
+    typeof value === 'bigint' ? value : fail(ctx, path, isEmpty(value) ? 'required' : 'bigint', msg),
+  );
 ```
 
 ## License

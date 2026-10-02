@@ -1,6 +1,8 @@
 {
   "files": [],
   "references": [
-    { "path": "packages/tinyval" }
+    { "path": "packages/tinyval" },
+    { "path": "packages/tinyval-vue" },
+    { "path": "packages/tinyval-mask" }
   ]
 }

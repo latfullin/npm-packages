@@ -1,6 +1,7 @@
 import type { Message } from '../core.js';
 
-const en: Record<string, Message> = {
+// Английские тексты по умолчанию. Ключи этого файла — полный список кодов ошибок (тип MessageCode)
+const en = {
   invalid: 'Invalid value',
   required: 'Required',
   string: 'Must be a string',
@@ -11,6 +12,9 @@ const en: Record<string, Message> = {
   array: 'Must be an array',
   literal: 'Must be {expected}',
   oneOf: 'Must be one of: {options}',
+  union: 'Does not match any allowed type',
+  variant: 'Unknown type, expected one of: {options}',
+  depth: 'Too deeply nested (max {max})',
   unknownKey: 'Unknown field',
   minLength: 'Must be at least {min} long',
   maxLength: 'Must be at most {max} long',
@@ -21,6 +25,6 @@ const en: Record<string, Message> = {
   pattern: 'Invalid format',
   email: 'Invalid email',
   sameAs: 'Must match {field}',
-};
+} satisfies Record<string, Message>;
 
 export default en;

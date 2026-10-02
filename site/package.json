@@ -4,11 +4,14 @@
   "type": "module",
   "scripts": {
     "dev": "vitepress dev",
-    "build": "vitepress build",
-    "preview": "vitepress preview"
+    "build": "vitepress build && npm run check",
+    "preview": "vitepress preview",
+    "check": "node .vitepress/docs/check.mjs"
   },
   "dependencies": {
-    "tinyval": "*"
+    "tinyval": "*",
+    "tinyval-vue": "*",
+    "tinyval-mask": "*"
   },
   "devDependencies": {
     "vitepress": "^1.6.4"

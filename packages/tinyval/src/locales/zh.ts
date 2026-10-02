@@ -1,6 +1,6 @@
-import type { Message } from '../core.js';
+import type { Messages } from '../core.js';
 
-const zh: Record<string, Message> = {
+const zh = {
   invalid: '无效的值',
   required: '此项为必填项',
   string: '必须是字符串',
@@ -11,6 +11,9 @@ const zh: Record<string, Message> = {
   array: '必须是数组',
   literal: '必须是 {expected}',
   oneOf: '必须是以下值之一：{options}',
+  union: '不符合任何允许的类型',
+  variant: '未知类型，允许的值：{options}',
+  depth: '嵌套层级过深（最多 {max}）',
   unknownKey: '未知字段',
   minLength: '长度不能少于 {min}',
   maxLength: '长度不能超过 {max}',
@@ -21,6 +24,6 @@ const zh: Record<string, Message> = {
   pattern: '格式无效',
   email: '邮箱地址无效',
   sameAs: '必须与 {field} 一致',
-};
+} satisfies Messages;
 
 export default zh;

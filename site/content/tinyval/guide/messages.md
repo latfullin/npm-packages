@@ -41,6 +41,49 @@ setMessages(ru);                             // всё на русском
 setMessages({ required: 'Заполните поле' });  // переопределить отдельные тексты
 ```
 
+## Язык для одного вызова
+
+`setMessages` действует на всё приложение. На сервере, где у каждого запроса свой язык, передайте сообщения в сам вызов — они не затронут другие запросы:
+
+```ts
+import ru from 'tinyval/locales/ru';
+import en from 'tinyval/locales/en';
+
+const locales = { ru, en };
+
+app.post('/users', (req, res) => {
+  const lang = req.acceptsLanguages('ru', 'en') || 'en';
+  const result = validate(CreateUser, req.body, { messages: locales[lang] });
+});
+```
+
+Сообщения вызова можно передать частично — недостающие возьмутся из `setMessages`.
+
+## Название поля — `{label}`
+
+В любом сообщении доступен параметр `{label}` — как `:attribute` в Laravel. По умолчанию это имя поля (`email`), а своё название задаёт [`label`](~/schemas/label) или опция `labels`:
+
+```ts
+const Signup = object({
+  email: label(pipe(string(), email()), 'Почта'),
+  password: label(pipe(string(), minLength(8)), 'Пароль'),
+});
+
+setMessages({ required: 'Поле «{label}» обязательно', minLength: '{label}: минимум {min} символов' });
+
+validate(Signup, { password: '123' }).errors;
+// { email: 'Поле «Почта» обязательно', password: 'Пароль: минимум 8 символов' }
+```
+
+## Перевод на клиенте — params
+
+Если сервер не знает язык пользователя, можно отдать клиенту коды и параметры ошибок, а текст собрать на фронтенде:
+
+```ts
+validate(Signup, body).issues;
+// [{ code: 'minLength', params: { min: 8 }, path: ['password'], message: '...' }]
+```
+
 ## Локализации
 
 | Импорт | Язык |
@@ -50,6 +93,8 @@ setMessages({ required: 'Заполните поле' });  // переопред
 | `tinyval/locales/zh` | Китайский (упрощённый) |
 
 `setMessages(en)` возвращает английские тексты.
+
+Чтобы поменять тексты под себя, скопируйте lang-файл в проект командой `npx tinyval lang ru` — см. [Свой lang-файл](~/guide/custom-lang).
 
 ## Все коды ошибок
 
@@ -65,6 +110,9 @@ setMessages({ required: 'Заполните поле' });  // переопред
 | `array` | [`array`](~/schemas/array) | Must be an array | Должно быть списком |
 | `literal` | [`literal`](~/schemas/literal) | Must be &#123;expected&#125; | Должно быть &#123;expected&#125; |
 | `oneOf` | [`oneOf`](~/schemas/one-of) | Must be one of: &#123;options&#125; | Допустимые значения: &#123;options&#125; |
+| `union` | [`union`](~/schemas/union) | Does not match any allowed type | Значение не подходит ни под один из вариантов |
+| `variant` | [`variant`](~/schemas/variant) | Unknown type, expected one of: &#123;options&#125; | Неизвестный тип, допустимые: &#123;options&#125; |
+| `depth` | [`lazy`](~/schemas/lazy) | Too deeply nested (max &#123;max&#125;) | Слишком глубокая вложенность (максимум &#123;max&#125;) |
 | `unknownKey` | [`object`](~/schemas/object) с `unknown: 'strict'` | Unknown field | Неизвестное поле |
 | `minLength` | [`minLength`](~/actions/min-length) | Must be at least &#123;min&#125; long | Минимальная длина — &#123;min&#125; |
 | `maxLength` | [`maxLength`](~/actions/max-length) | Must be at most &#123;max&#125; long | Максимальная длина — &#123;max&#125; |
@@ -120,6 +168,49 @@ setMessages(ru);                               // everything in Russian
 setMessages({ required: 'Please fill in' }); // override some texts
 ```
 
+## Language per call
+
+`setMessages` applies to the whole app. On a server where every request has its own language, pass the messages to the call itself — other requests are not affected:
+
+```ts
+import ru from 'tinyval/locales/ru';
+import en from 'tinyval/locales/en';
+
+const locales = { ru, en };
+
+app.post('/users', (req, res) => {
+  const lang = req.acceptsLanguages('ru', 'en') || 'en';
+  const result = validate(CreateUser, req.body, { messages: locales[lang] });
+});
+```
+
+Call messages can be partial — missing ones come from `setMessages`.
+
+## Field name — `{label}`
+
+Every message can use the `{label}` parameter — like `:attribute` in Laravel. By default it is the field name (`email`); a custom name is set with [`label`](~/schemas/label) or the `labels` option:
+
+```ts
+const Signup = object({
+  email: label(pipe(string(), email()), 'Email address'),
+  password: label(pipe(string(), minLength(8)), 'Password'),
+});
+
+setMessages({ required: '{label} is required', minLength: '{label} must be at least {min} characters' });
+
+validate(Signup, { password: '123' }).errors;
+// { email: 'Email address is required', password: 'Password must be at least 8 characters' }
+```
+
+## Translating on the client — params
+
+If the server doesn't know the user's language, send the error codes and parameters to the client and build the text on the frontend:
+
+```ts
+validate(Signup, body).issues;
+// [{ code: 'minLength', params: { min: 8 }, path: ['password'], message: '...' }]
+```
+
 ## Locales
 
 | Import | Language |
@@ -129,6 +220,8 @@ setMessages({ required: 'Please fill in' }); // override some texts
 | `tinyval/locales/zh` | Simplified Chinese |
 
 `setMessages(en)` brings back the English texts.
+
+To customize the texts, copy a lang file into your project with `npx tinyval lang en` — see [Custom lang file](~/guide/custom-lang).
 
 ## All error codes
 
@@ -144,6 +237,9 @@ setMessages({ required: 'Please fill in' }); // override some texts
 | `array` | [`array`](~/schemas/array) | Must be an array |
 | `literal` | [`literal`](~/schemas/literal) | Must be &#123;expected&#125; |
 | `oneOf` | [`oneOf`](~/schemas/one-of) | Must be one of: &#123;options&#125; |
+| `union` | [`union`](~/schemas/union) | Does not match any allowed type |
+| `variant` | [`variant`](~/schemas/variant) | Unknown type, expected one of: &#123;options&#125; |
+| `depth` | [`lazy`](~/schemas/lazy) | Too deeply nested (max &#123;max&#125;) |
 | `unknownKey` | [`object`](~/schemas/object) with `unknown: 'strict'` | Unknown field |
 | `minLength` | [`minLength`](~/actions/min-length) | Must be at least &#123;min&#125; long |
 | `maxLength` | [`maxLength`](~/actions/max-length) | Must be at most &#123;max&#125; long |
@@ -199,6 +295,49 @@ setMessages(zh);                         // 全部使用中文
 setMessages({ required: '请填写此项' }); // 覆盖部分文本
 ```
 
+## 单次调用的语言
+
+`setMessages` 对整个应用生效。在服务端，每个请求可能使用不同的语言，此时请把信息传给调用本身 —— 不会影响其他请求：
+
+```ts
+import zh from 'tinyval/locales/zh';
+import en from 'tinyval/locales/en';
+
+const locales = { zh, en };
+
+app.post('/users', (req, res) => {
+  const lang = req.acceptsLanguages('zh', 'en') || 'en';
+  const result = validate(CreateUser, req.body, { messages: locales[lang] });
+});
+```
+
+调用时的信息可以只传一部分 —— 缺少的取自 `setMessages`。
+
+## 字段名称 —— `{label}`
+
+所有信息都可以使用 `{label}` 参数 —— 类似 Laravel 的 `:attribute`。默认是字段名（`email`），可以通过 [`label`](~/schemas/label) 或 `labels` 选项设置自定义名称：
+
+```ts
+const Signup = object({
+  email: label(pipe(string(), email()), '邮箱'),
+  password: label(pipe(string(), minLength(8)), '密码'),
+});
+
+setMessages({ required: '{label}为必填项', minLength: '{label}至少需要 {min} 个字符' });
+
+validate(Signup, { password: '123' }).errors;
+// { email: '邮箱为必填项', password: '密码至少需要 8 个字符' }
+```
+
+## 在客户端翻译 —— params
+
+如果服务端不知道用户的语言，可以把错误代码和参数发送给客户端，在前端生成文本：
+
+```ts
+validate(Signup, body).issues;
+// [{ code: 'minLength', params: { min: 8 }, path: ['password'], message: '...' }]
+```
+
 ## 语言包
 
 | 导入 | 语言 |
@@ -208,6 +347,8 @@ setMessages({ required: '请填写此项' }); // 覆盖部分文本
 | `tinyval/locales/zh` | 简体中文 |
 
 `setMessages(en)` 可以恢复英文文本。
+
+如需自定义文本，可以用 `npx tinyval lang zh` 把语言文件复制到项目中 —— 见 [自定义语言文件](~/guide/custom-lang)。
 
 ## 全部错误代码
 
@@ -223,6 +364,9 @@ setMessages({ required: '请填写此项' }); // 覆盖部分文本
 | `array` | [`array`](~/schemas/array) | Must be an array | 必须是数组 |
 | `literal` | [`literal`](~/schemas/literal) | Must be &#123;expected&#125; | 必须是 &#123;expected&#125; |
 | `oneOf` | [`oneOf`](~/schemas/one-of) | Must be one of: &#123;options&#125; | 必须是以下值之一：&#123;options&#125; |
+| `union` | [`union`](~/schemas/union) | Does not match any allowed type | 不符合任何允许的类型 |
+| `variant` | [`variant`](~/schemas/variant) | Unknown type, expected one of: &#123;options&#125; | 未知类型，允许的值：&#123;options&#125; |
+| `depth` | [`lazy`](~/schemas/lazy) | Too deeply nested (max &#123;max&#125;) | 嵌套层级过深（最多 &#123;max&#125;） |
 | `unknownKey` | 使用 `unknown: 'strict'` 的 [`object`](~/schemas/object) | Unknown field | 未知字段 |
 | `minLength` | [`minLength`](~/actions/min-length) | Must be at least &#123;min&#125; long | 长度不能少于 &#123;min&#125; |
 | `maxLength` | [`maxLength`](~/actions/max-length) | Must be at most &#123;max&#125; long | 长度不能超过 &#123;max&#125; |

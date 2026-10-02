@@ -1,4 +1,4 @@
-import { FAIL, fail, type Message, type Schema } from './core.js';
+import { createSchema, FAIL, fail, type Message, type Schema } from './core.js';
 
 export interface Info {
   // Объект, в котором лежит поле (исходные данные), и корень всех данных
@@ -16,36 +16,34 @@ export interface Action<T> {
 }
 
 export function pipe<T>(schema: Schema<T>, ...actions: Action<T>[]): Schema<T> {
-  return {
-    run(v, ctx, path, parent) {
-      let r = schema.run(v, ctx, path, parent);
-      if (r === FAIL) return r;
-      const info: Info = { parent, root: ctx.root };
-      const deferred: Action<T>[] = [];
-      let ok = true;
-      for (const a of actions) {
-        if (a.k === 2) deferred.push(a);
-        else if (a.k === 1) {
-          if (ok) r = a.f(r, info) as T;
-        } else if (!a.f(r, info)) {
-          fail(ctx, path, a.c ?? 'invalid', a.m, a.p);
-          ok = false;
-          if (!ctx.all) break;
-        }
+  return createSchema((v, ctx, path, parent) => {
+    let r = schema.run(v, ctx, path, parent);
+    if (r === FAIL) return r;
+    const info: Info = { parent, root: ctx.root };
+    const deferred: Action<T>[] = [];
+    let ok = true;
+    for (const a of actions) {
+      if (a.k === 2) deferred.push(a);
+      else if (a.k === 1) {
+        if (ok) r = a.f(r, info) as T;
+      } else if (!a.f(r, info)) {
+        fail(ctx, path, a.c ?? 'invalid', a.m, a.p);
+        ok = false;
+        if (!ctx.all) break;
       }
-      if (!ok) return FAIL;
-      // Асинхронные проверки запускаются, только если синхронные прошли
-      const value = r;
-      for (const a of deferred) {
-        ctx.pending.push(
-          Promise.resolve(a.f(value, info)).then((res) => {
-            if (!res) fail(ctx, path, a.c ?? 'invalid', a.m, a.p);
-          }),
-        );
-      }
-      return r;
-    },
-  };
+    }
+    if (!ok) return FAIL;
+    // Асинхронные проверки запускаются, только если синхронные прошли
+    const value = r;
+    for (const a of deferred) {
+      ctx.pending.push(
+        Promise.resolve(a.f(value, info)).then((res) => {
+          if (!res) fail(ctx, path, a.c ?? 'invalid', a.m, a.p);
+        }),
+      );
+    }
+    return r;
+  });
 }
 
 const rule = <T>(c: string, f: (v: T, info: Info) => boolean, m?: Message, p?: Record<string, unknown>): Action<T> => ({

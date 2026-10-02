@@ -5,6 +5,9 @@
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "bin": {
+    "tinyval": "./dist/cli.js"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -46,6 +49,7 @@
   "author": "kilkenny",
   "license": "MIT",
   "devDependencies": {
+    "@types/node": "^24.19.1",
     "typescript": "^7.0.2"
   }
 }

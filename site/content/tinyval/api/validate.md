@@ -30,6 +30,9 @@ function validate<S extends Schema>(schema: S, value: unknown, options?: Options
 | Опция | Тип | По умолчанию | Описание |
 | --- | --- | --- | --- |
 | `all` | `boolean` | `false` | Собирать все ошибки поля в `issues`, а не останавливаться на первой. В `errors` всё равно попадает первая |
+| `messages` | `Record<string, Message>` | — | Сообщения только для этого вызова — например, язык текущего запроса. Чего нет — берётся из [`setMessages`](~/api/set-messages) |
+| `labels` | `Record<string, string>` | — | Названия полей для `{label}` по пути: `{ email: 'Почта', 'address.city': 'Город' }`. См. [label](~/schemas/label) |
+| `maxDepth` | `number` | `256` | Максимальная вложенность рекурсивных схем [`lazy`](~/schemas/lazy) |
 
 ## Возвращает
 
@@ -38,7 +41,7 @@ function validate<S extends Schema>(schema: S, value: unknown, options?: Options
 | `valid` | `boolean` | `true`, если ошибок нет |
 | `data` | `T \| undefined` | Очищенные данные: применены `trim`, `coerce`, значения по умолчанию, лишние поля удалены. При ошибке — `undefined` |
 | `errors` | `Record<string, string>` | Первая ошибка каждого поля. Ключ — путь через точку: `name`, `address.city`, `items.0.title`. Ошибка самого значения — под ключом `''` |
-| `issues` | `Issue[]` | Все ошибки по порядку: `{ code, message, path }`, где `path` — массив (`['items', 0, 'title']`) |
+| `issues` | `Issue[]` | Все ошибки по порядку: `{ code, message, path, params }`, где `path` — массив (`['items', 0, 'title']`), `params` — параметры правила (`{ min: 8 }`) |
 
 Если в схеме есть [`checkAsync`](~/actions/check-async), `validate` бросит ошибку — используйте [`validateAsync`](~/api/validate-async).
 :::
@@ -55,6 +58,9 @@ function validate<S extends Schema>(schema: S, value: unknown, options?: Options
 | Option | Type | Default | Description |
 | --- | --- | --- | --- |
 | `all` | `boolean` | `false` | Collect all errors of a field in `issues` instead of stopping at the first one. `errors` still holds the first |
+| `messages` | `Record<string, Message>` | — | Messages for this call only — e.g. the language of the current request. Missing ones come from [`setMessages`](~/api/set-messages) |
+| `labels` | `Record<string, string>` | — | Field names for `{label}` by path: `{ email: 'Email', 'address.city': 'City' }`. See [label](~/schemas/label) |
+| `maxDepth` | `number` | `256` | Maximum nesting of recursive [`lazy`](~/schemas/lazy) schemas |
 
 ## Returns
 
@@ -63,7 +69,7 @@ function validate<S extends Schema>(schema: S, value: unknown, options?: Options
 | `valid` | `boolean` | `true` if there are no errors |
 | `data` | `T \| undefined` | Cleaned data: `trim`, `coerce` and defaults applied, unknown keys removed. `undefined` on error |
 | `errors` | `Record<string, string>` | The first error of each field. The key is a dot path: `name`, `address.city`, `items.0.title`. An error of the value itself is under `''` |
-| `issues` | `Issue[]` | All errors in order: `{ code, message, path }`, where `path` is an array (`['items', 0, 'title']`) |
+| `issues` | `Issue[]` | All errors in order: `{ code, message, path, params }`, where `path` is an array (`['items', 0, 'title']`) and `params` are the rule parameters (`{ min: 8 }`) |
 
 If the schema contains [`checkAsync`](~/actions/check-async), `validate` throws — use [`validateAsync`](~/api/validate-async).
 :::
@@ -80,6 +86,9 @@ If the schema contains [`checkAsync`](~/actions/check-async), `validate` throws 
 | 选项 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | `all` | `boolean` | `false` | 在 `issues` 中收集字段的全部错误，而不是在第一个错误处停止。`errors` 中仍为第一个错误 |
+| `messages` | `Record<string, Message>` | — | 仅用于本次调用的信息 —— 例如当前请求的语言。缺少的信息取自 [`setMessages`](~/api/set-messages) |
+| `labels` | `Record<string, string>` | — | 按路径指定 `{label}` 的字段名称：`{ email: '邮箱', 'address.city': '城市' }`。见 [label](~/schemas/label) |
+| `maxDepth` | `number` | `256` | 递归 Schema [`lazy`](~/schemas/lazy) 的最大嵌套层级 |
 
 ## 返回值
 
@@ -88,7 +97,7 @@ If the schema contains [`checkAsync`](~/actions/check-async), `validate` throws 
 | `valid` | `boolean` | 没有错误时为 `true` |
 | `data` | `T \| undefined` | 清洗后的数据：已应用 `trim`、`coerce` 和默认值，多余字段已删除。出错时为 `undefined` |
 | `errors` | `Record<string, string>` | 每个字段的第一个错误。键为点分隔路径：`name`、`address.city`、`items.0.title`。值本身的错误在键 `''` 下 |
-| `issues` | `Issue[]` | 按顺序排列的全部错误：`{ code, message, path }`，其中 `path` 为数组（`['items', 0, 'title']`） |
+| `issues` | `Issue[]` | 按顺序排列的全部错误：`{ code, message, path, params }`，其中 `path` 为数组（`['items', 0, 'title']`），`params` 为规则参数（`{ min: 8 }`） |
 
 如果 Schema 中包含 [`checkAsync`](~/actions/check-async)，`validate` 会抛出错误 —— 请使用 [`validateAsync`](~/api/validate-async)。
 :::

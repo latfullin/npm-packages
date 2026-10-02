@@ -41,7 +41,7 @@ await validateAsync(Signup, body);
 
 ## Своя схема
 
-Схема — объект с методом `run`. Он возвращает значение (возможно, преобразованное) или результат `fail(...)`. Пример схемы для `bigint`:
+Схему создаёт [`createSchema`](~/api/create-schema) из функции проверки. Функция возвращает значение (возможно, преобразованное) или результат `fail(...)`. Пример схемы для `bigint`:
 :::
 
 ::: en
@@ -87,7 +87,7 @@ More — [checkAsync](~/actions/check-async).
 
 ## A custom schema
 
-A schema is an object with a `run` method. It returns the value (possibly transformed) or the result of `fail(...)`. A schema for `bigint`:
+[`createSchema`](~/api/create-schema) creates a schema from a validation function. The function returns the value (possibly transformed) or the result of `fail(...)`. A schema for `bigint`:
 :::
 
 ::: zh
@@ -133,19 +133,18 @@ await validateAsync(Signup, body);
 
 ## 自定义 Schema
 
-Schema 是一个带有 `run` 方法的对象。它返回值（可以是转换后的值）或 `fail(...)` 的结果。`bigint` 的 Schema 示例：
+[`createSchema`](~/api/create-schema) 用校验函数创建 Schema。函数返回值（可以是转换后的值）或 `fail(...)` 的结果。`bigint` 的 Schema 示例：
 :::
 
 ```ts
-import { fail, isEmpty, type Schema, type Message } from 'tinyval';
+import { createSchema, fail, isEmpty, type Message } from 'tinyval';
 
-export const bigint = (msg?: Message): Schema<bigint> => ({
-  run(value, ctx, path) {
+export const bigint = (msg?: Message) =>
+  createSchema<bigint>((value, ctx, path) => {
     if (isEmpty(value)) return fail(ctx, path, 'required', msg);
     if (typeof value !== 'bigint') return fail(ctx, path, 'bigint', msg);
     return value;
-  },
-});
+  });
 ```
 
 ::: ru
@@ -153,7 +152,7 @@ export const bigint = (msg?: Message): Schema<bigint> => ({
 - `isEmpty(value)` — `true` для `undefined`, `null` и `''`.
 - Для своего кода ошибки добавьте текст через [`setMessages`](~/api/set-messages): `setMessages({ bigint: 'Должно быть bigint' })`. Без этого используется сообщение `invalid`.
 
-Своя схема работает везде: в [`object`](~/schemas/object), [`array`](~/schemas/array), [`pipe`](~/actions/pipe), [`optional`](~/schemas/optional), и тип выводится через `Infer`.
+Своя схема работает везде: в [`object`](~/schemas/object), [`array`](~/schemas/array), [`pipe`](~/actions/pipe), [`optional`](~/schemas/optional), тип выводится через `Infer`, а ещё она поддерживает [Standard Schema](~/guide/standard-schema).
 :::
 
 ::: en
@@ -161,7 +160,7 @@ export const bigint = (msg?: Message): Schema<bigint> => ({
 - `isEmpty(value)` — `true` for `undefined`, `null` and `''`.
 - Add a text for your code via [`setMessages`](~/api/set-messages): `setMessages({ bigint: 'Must be a bigint' })`. Otherwise the `invalid` message is used.
 
-A custom schema works everywhere: in [`object`](~/schemas/object), [`array`](~/schemas/array), [`pipe`](~/actions/pipe), [`optional`](~/schemas/optional), and its type is inferred with `Infer`.
+A custom schema works everywhere: in [`object`](~/schemas/object), [`array`](~/schemas/array), [`pipe`](~/actions/pipe), [`optional`](~/schemas/optional), its type is inferred with `Infer`, and it supports [Standard Schema](~/guide/standard-schema).
 :::
 
 ::: zh
@@ -169,7 +168,7 @@ A custom schema works everywhere: in [`object`](~/schemas/object), [`array`](~/s
 - `isEmpty(value)` —— 对 `undefined`、`null` 和 `''` 返回 `true`。
 - 通过 [`setMessages`](~/api/set-messages) 为自定义代码添加文本：`setMessages({ bigint: '必须是 bigint' })`。否则使用 `invalid` 的信息。
 
-自定义 Schema 可以在任何地方使用：[`object`](~/schemas/object)、[`array`](~/schemas/array)、[`pipe`](~/actions/pipe)、[`optional`](~/schemas/optional)，并且可以通过 `Infer` 推导类型。
+自定义 Schema 可以在任何地方使用：[`object`](~/schemas/object)、[`array`](~/schemas/array)、[`pipe`](~/actions/pipe)、[`optional`](~/schemas/optional)，可以通过 `Infer` 推导类型，并且支持 [Standard Schema](~/guide/standard-schema)。
 :::
 
 ## @t(see)

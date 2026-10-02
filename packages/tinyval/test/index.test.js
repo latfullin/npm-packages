@@ -91,7 +91,7 @@ test('вложенные объекты и массивы: пути ошибок
     'items.1.name': 'Required',
     'items.1.qty': 'Must be at least 1',
   });
-  assert.deepEqual(r.issues[0], { code: 'required', message: 'Required', path: ['address', 'city'] });
+  assert.deepEqual(r.issues[0], { code: 'required', message: 'Required', path: ['address', 'city'], params: {} });
 });
 
 test('лишние поля: strip, strict, passthrough', () => {

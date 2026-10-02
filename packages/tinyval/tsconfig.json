@@ -10,7 +10,8 @@
     "tsBuildInfoFile": ".tsbuildinfo",
     "strict": true,
     "removeComments": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "types": ["node"]
   },
   "include": ["src"]
 }

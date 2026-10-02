@@ -27,7 +27,6 @@ const form = ref({ name: '', email: '', age: '', password: '', confirm: '' });
 
 // lib — модуль выбранной версии пакета
 function check(lib: any) {
-  lib.setMessages(messages[code.value] ?? en);
   const { object, string, optional, pipe, trim, minLength, email, min, max, integer, sameAs, coerce } = lib;
   const schema = object({
     name: pipe(string(), trim(), minLength(2)),
@@ -36,7 +35,7 @@ function check(lib: any) {
     password: pipe(string(), minLength(8)),
     confirm: pipe(string(), sameAs('password')),
   });
-  const { valid, data, errors } = lib.validate(schema, form.value);
+  const { valid, data, errors } = lib.validate(schema, form.value, { messages: messages[code.value] ?? en });
   return JSON.stringify({ valid, data, errors }, null, 2);
 }
 </script>

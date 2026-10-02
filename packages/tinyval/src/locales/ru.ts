@@ -1,6 +1,6 @@
-import type { Message } from '../core.js';
+import type { Messages } from '../core.js';
 
-const ru: Record<string, Message> = {
+const ru = {
   invalid: 'Некорректное значение',
   required: 'Обязательное поле',
   string: 'Должно быть строкой',
@@ -11,6 +11,9 @@ const ru: Record<string, Message> = {
   array: 'Должно быть списком',
   literal: 'Должно быть {expected}',
   oneOf: 'Допустимые значения: {options}',
+  union: 'Значение не подходит ни под один из вариантов',
+  variant: 'Неизвестный тип, допустимые: {options}',
+  depth: 'Слишком глубокая вложенность (максимум {max})',
   unknownKey: 'Неизвестное поле',
   minLength: 'Минимальная длина — {min}',
   maxLength: 'Максимальная длина — {max}',
@@ -21,6 +24,6 @@ const ru: Record<string, Message> = {
   pattern: 'Неверный формат',
   email: 'Некорректный email',
   sameAs: 'Значения не совпадают',
-};
+} satisfies Messages;
 
 export default ru;

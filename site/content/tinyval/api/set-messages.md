@@ -21,40 +21,43 @@ function setMessages(messages: Record<string, Message>): void
 ::: ru
 | Параметр | Тип | Описание |
 | --- | --- | --- |
-| `messages` | `Record<string, Message>` | Код ошибки → текст или функция `(params) => string`. Остальные сообщения не меняются |
+| `messages` | `Record<string, Message>` | Код ошибки (`required`) или поле и код (`email.required`, `items.*.title.required`) → текст или функция `(params) => string`. Остальные сообщения не меняются |
 :::
 
 ::: en
 | Parameter | Type | Description |
 | --- | --- | --- |
-| `messages` | `Record<string, Message>` | Error code → text or a function `(params) => string`. Other messages stay unchanged |
+| `messages` | `Record<string, Message>` | An error code (`required`) or a field and code (`email.required`, `items.*.title.required`) → text or a function `(params) => string`. Other messages stay unchanged |
 :::
 
 ::: zh
 | 参数 | 类型 | 说明 |
 | --- | --- | --- |
-| `messages` | `Record<string, Message>` | 错误代码 → 文本或函数 `(params) => string`。其他信息保持不变 |
+| `messages` | `Record<string, Message>` | 错误代码（`required`）或字段与代码（`email.required`、`items.*.title.required`）→ 文本或函数 `(params) => string`。其他信息保持不变 |
 :::
 
 ## @t(notes)
 
 ::: ru
-- Действует глобально — вызовите один раз при старте приложения.
+- Действует глобально — вызовите один раз при старте приложения. Для языка отдельного запроса используйте опцию `messages` у [`validate`](~/api/validate).
 - Сообщение, переданное прямо в правило (`minLength(3, '...')`), важнее глобального.
+- Полный свой lang-файл: `npx tinyval lang ru` — см. [Свой lang-файл](~/guide/custom-lang).
 - Можно добавлять сообщения для своих кодов ошибок — см. [Свои правила и схемы](~/guide/custom-rules).
 - Список кодов — в разделе [Сообщения и локализация](~/guide/messages#все-коды-ошибок).
 :::
 
 ::: en
-- It is global — call it once on startup.
+- It is global — call it once on startup. For the language of a single request use the `messages` option of [`validate`](~/api/validate).
 - A message passed to a rule (`minLength(3, '...')`) takes precedence over the global one.
+- A full custom lang file: `npx tinyval lang ru` — see [Custom lang file](~/guide/custom-lang).
 - You can add messages for your own error codes — see [Custom rules & schemas](~/guide/custom-rules).
 - The list of codes is in [Messages & i18n](~/guide/messages#all-error-codes).
 :::
 
 ::: zh
-- 全局生效 —— 在应用启动时调用一次即可。
+- 全局生效 —— 在应用启动时调用一次即可。如需为单个请求设置语言，请使用 [`validate`](~/api/validate) 的 `messages` 选项。
 - 直接传给规则的信息（`minLength(3, '...')`）优先于全局信息。
+- 完整的自定义语言文件：`npx tinyval lang ru` —— 见 [自定义语言文件](~/guide/custom-lang)。
 - 可以为自定义错误代码添加信息 —— 见 [自定义规则与 Schema](~/guide/custom-rules)。
 - 错误代码列表见 [错误信息与国际化](~/guide/messages#全部错误代码)。
 :::

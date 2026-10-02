@@ -49,6 +49,8 @@ export function localize(md: string, code: string): string {
     if (line.startsWith('```')) fence = !fence;
     const open = !fence && line.match(/^::: ([a-z]{2}(?:-[a-z]+)?)\s*$/);
     if (open && codes.has(open[1])) {
+      // повторный блок того же языка — начало следующей группы, а не замена предыдущей
+      if (group && open[1] in group) flush();
       group ??= {};
       current = group[open[1]] = [];
       continue;
@@ -66,6 +68,8 @@ function render(md: string, t: LangFile, pkg: PackageMeta): string {
   return localize(md, t.code)
     .replace(/@t\((\w+)\)/g, (s, key) => t.docs[key as keyof LangFile['docs']] ?? s)
     .replace(/\]\(~\//g, `](${prefix(t.code)}/${pkg.name}/`)
+    // ссылка на другой пакет сайта: [object](@/tinyval/schemas/object)
+    .replace(/\]\(@\//g, `](${prefix(t.code)}/`)
     .replace(/\n{3,}/g, '\n\n');
 }
 
