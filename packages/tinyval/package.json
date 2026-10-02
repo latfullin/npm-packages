@@ -1,0 +1,39 @@
+{
+  "name": "tinyval",
+  "version": "0.1.0",
+  "description": "Tiny, fast, zero-dependency validation",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "rm -rf dist .tsbuildinfo && tsc",
+    "dev": "tsc --watch",
+    "test": "npm run build && node --test \"test/**/*.test.js\"",
+    "prepublishOnly": "npm test"
+  },
+  "keywords": [
+    "validation",
+    "validator",
+    "tiny",
+    "zero-dependency"
+  ],
+  "author": "kilkenny",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^7.0.2"
+  }
+}

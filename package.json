@@ -1,0 +1,18 @@
+{
+  "name": "npm-packages",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "site"
+  ],
+  "scripts": {
+    "dev": "tsc -b && concurrently -k -n pkg,site -c blue,green \"tsc -b -w --preserveWatchOutput\" \"npm run dev -w site\"",
+    "build": "npm run build -w packages && npm run build -w site",
+    "test": "npm test -w packages"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.5",
+    "typescript": "^7.0.2"
+  }
+}
