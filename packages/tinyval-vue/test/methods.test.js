@@ -77,7 +77,7 @@ test('ofetch, ValidationError из tinyval и свой extractErrors', async () 
     validationError = e;
   }
   assert.ok(validationError instanceof ValidationError);
-  assert.deepEqual(defaultExtractErrors(validationError), { name: 'Must be at least 2 long' });
+  assert.deepEqual(defaultExtractErrors(validationError), { name: 'Must be at least 2 characters long' });
   assert.equal(defaultExtractErrors({ response: { status: 500 } }), undefined);
 
   const form = useForm(User, {

@@ -62,7 +62,7 @@ test('TvForm + TvField + TvError: ввод, ошибка после blur, aria-�
   await flush();
   assert.equal(form.values.name, 'I');
   const error = root.querySelector('[role="alert"]');
-  assert.equal(error.textContent, 'Must be at least 2 long');
+  assert.equal(error.textContent, 'Must be at least 2 characters long');
   assert.equal(name.getAttribute('aria-invalid'), 'true');
   assert.equal(name.getAttribute('aria-describedby'), error.id);
 

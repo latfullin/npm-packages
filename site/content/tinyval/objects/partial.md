@@ -86,7 +86,7 @@ const CreateUser = object({
 const UpdateUser = partial(CreateUser);
 
 validate(UpdateUser, { name: 'Ivan' }).data; // { name: 'Ivan' }
-validate(UpdateUser, { name: 'I' }).errors;  // { name: 'Must be at least 2 long' }
+validate(UpdateUser, { name: 'I' }).errors;  // { name: 'Must be at least 2 characters long' }
 ```
 
 ::: ru

@@ -54,6 +54,8 @@ test('телефон РФ: 8 и 7 в начале, вставка в любом 
     assert.equal(unmask(v, p), '79991234567', v);
   }
   assert.equal(mask('8', p), '+7');
+  assert.equal(unmask('+7 (', p), '', 'один префикс — пустое значение');
+  assert.equal(unmask('8', p), '');
   assert.equal(mask('+7 (8', p), '+7 (8', 'с + восьмёрка — уже код города');
   assert.equal(isComplete('+7 (999) 123-45-6', p), false);
   assert.equal(isComplete('+7 (999) 123-45-67', p), true);
@@ -142,4 +144,77 @@ test('null и undefined не ломают функции', () => {
   assert.equal(mask(undefined, masks.phone()), '');
   assert.equal(unmask(null, masks.card()), '');
   assert.equal(mask(undefined, numberMask()), '');
+});
+
+test('даты и время: невозможные цифры не вводятся', () => {
+  const d = masks.date();
+  assert.equal(mask('3205', d), '30', '32-го числа нет: 2 пропущена');
+  assert.equal(mask('3112', d), '31.12');
+  assert.equal(mask('0000', d), '0', '00 число не вводится');
+  assert.equal(mask('01132026', d), '01.12.026', '13-го месяца нет');
+  assert.equal(mask('2902', d), '29.02', 'существование даты проверяет валидация');
+  assert.equal(mask('2026-13-40', masks.date('yyyy-mm-dd')), '2026-10', '3 и 4 после 1 в месяце невозможны и пропускаются');
+  assert.equal(mask('2359', masks.time()), '23:59');
+  assert.equal(mask('2460', masks.time()), '20', '24 и 60 не вводятся');
+  assert.equal(mask('235960', masks.time(true)), '23:59:0');
+  assert.equal(mask('1326', masks.cardExpiry()), '12/6');
+  assert.equal(mask('311220262359', masks.datetime()), '31.12.2026 23:59');
+});
+
+test('allow в своей маске', () => {
+  const even = createMask({ pattern: '9999', allow: (_, ch) => Number(ch) % 2 === 0 });
+  assert.equal(mask('123456', even), '246');
+});
+
+test('template: шаблон с заполнителем', () => {
+  assert.equal(masks.phone().template('', '_'), '+7 (___) ___-__-__');
+  assert.equal(masks.card().template('3782', '_'), '____ ______ _____', 'шаблон Amex');
+  assert.equal(masks.card().template('4276', '_'), '____ ____ ____ ____');
+  assert.equal(masks.inn().template('', '•'), '••••••••••', 'необязательная часть не показывается');
+  assert.equal(numberMask().template, undefined, 'у числовой маски шаблона нет');
+});
+
+test('valid: значение правильно по смыслу', async () => {
+  const { isValid, isComplete } = await import('../dist/index.js');
+  const cases = [
+    [masks.date(), '31.02.2026', true, false],
+    [masks.date(), '29.02.2024', true, true],
+    [masks.date(), '29.02.2026', true, false],
+    [masks.date('yyyy-mm-dd'), '2026-04-31', true, false],
+    [masks.datetime(), '30.04.2026 23:59', true, true],
+    [masks.card(), '4111 1111 1111 1111', true, true],
+    [masks.card(), '4111 1111 1111 1112', true, false],
+    [masks.card(), '3782 822463 10005', true, true],
+    [masks.cardExpiry(), '12/99', true, true],
+    [masks.cardExpiry(), '01/20', true, false],
+    [masks.inn(), '7707083893', true, true],
+    [masks.inn(), '7707083894', true, false],
+    [masks.inn(), '500100732259', true, true],
+    [masks.snils(), '112-233-445 95', true, true],
+    [masks.snils(), '112-233-445 96', true, false],
+    [masks.ogrn(), '1027700132195', true, true],
+    [masks.ogrn(), '1027700132196', true, false],
+    [masks.ogrn(), '304500116000157', true, true],
+    [masks.phone(), '+7 (999) 123-45-67', true, true],
+    [masks.phone(), '+7 (999) 123', false, false],
+    [masks.phoneAuto(), '+375291234567', true, true],
+    [masks.phoneAuto(), '+999123456789012', true, false],
+    [numberMask(), '12', true, true],
+    [createMask('99-99'), '12-34', true, true],
+  ];
+  for (const [m, v, complete, valid] of cases) {
+    assert.equal(isComplete(v, m), complete, `complete ${v}`);
+    assert.equal(isValid(v, m), valid, `valid ${v}`);
+    assert.equal(m.process(v).valid, valid);
+  }
+});
+
+test('validate в своей маске вызывается только для заполненного значения', () => {
+  let calls = 0;
+  const m = createMask({ pattern: '9999', validate: ({ raw }) => (calls++, raw !== '0000') });
+  assert.equal(m.process('12').valid, false);
+  assert.equal(calls, 0);
+  assert.equal(m.process('0000').valid, false);
+  assert.equal(m.process('1234').valid, true);
+  assert.equal(calls, 2);
 });

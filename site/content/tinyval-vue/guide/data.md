@@ -94,8 +94,8 @@ The format is the same as `errors` in tinyval: dot path → text of the first er
 | Шаг | `errors` | `allErrors` | `valid` | `dirty` | `submitted` | `submitCount` | `submitSucceeded` | `data` |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1. Форма открыта | `{}` | `name`, `email`: Required | `false` | `false` | `false` | `0` | `false` | `undefined` |
-| 2. Ввёл в имя `' I'` | `{}` | `name`: Must be at least 2 long, `email`: Required | `false` | `true` | `false` | `0` | `false` | `undefined` |
-| 3. Ушёл с поля имени | `name`: Must be at least 2 long | как на шаге 2 | `false` | `true` | `false` | `0` | `false` | `undefined` |
+| 2. Ввёл в имя `' I'` | `{}` | `name`: Must be at least 2 characters long, `email`: Required | `false` | `true` | `false` | `0` | `false` | `undefined` |
+| 3. Ушёл с поля имени | `name`: Must be at least 2 characters long | как на шаге 2 | `false` | `true` | `false` | `0` | `false` | `undefined` |
 | 4. Нажал «Отправить» | `name`, `email` — все ошибки видны | как на шаге 2 | `false` | `true` | `true` | `1` | `false` | `undefined` |
 | 5. Исправил, сервер ответил 422 | `email`: The email has already been taken. | то же | `false` | `true` | `true` | `2` | `false` | `{ name: 'Ivan', … }` |
 | 6. Сменил email, отправил | `{}` | `{}` | `true` | `false` | `true` | `3` | `true` | `{ name: 'Ivan', email: 'petr@mail.ru', age: 30 }` |
@@ -115,8 +115,8 @@ A user fills in a sign-up form:
 | Step | `errors` | `allErrors` | `valid` | `dirty` | `submitted` | `submitCount` | `submitSucceeded` | `data` |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1. Form opened | `{}` | `name`, `email`: Required | `false` | `false` | `false` | `0` | `false` | `undefined` |
-| 2. Typed `' I'` into name | `{}` | `name`: Must be at least 2 long, `email`: Required | `false` | `true` | `false` | `0` | `false` | `undefined` |
-| 3. Left the name field | `name`: Must be at least 2 long | as in step 2 | `false` | `true` | `false` | `0` | `false` | `undefined` |
+| 2. Typed `' I'` into name | `{}` | `name`: Must be at least 2 characters long, `email`: Required | `false` | `true` | `false` | `0` | `false` | `undefined` |
+| 3. Left the name field | `name`: Must be at least 2 characters long | as in step 2 | `false` | `true` | `false` | `0` | `false` | `undefined` |
 | 4. Clicked "Submit" | `name`, `email` — all errors visible | as in step 2 | `false` | `true` | `true` | `1` | `false` | `undefined` |
 | 5. Fixed it, the server answered 422 | `email`: The email has already been taken. | same | `false` | `true` | `true` | `2` | `false` | `{ name: 'Ivan', … }` |
 | 6. Changed the email, submitted | `{}` | `{}` | `true` | `false` | `true` | `3` | `true` | `{ name: 'Ivan', email: 'petr@mail.ru', age: 30 }` |
@@ -136,8 +136,8 @@ What the table shows:
 | 步骤 | `errors` | `allErrors` | `valid` | `dirty` | `submitted` | `submitCount` | `submitSucceeded` | `data` |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1. 打开表单 | `{}` | `name`、`email`：Required | `false` | `false` | `false` | `0` | `false` | `undefined` |
-| 2. 在姓名中输入 `' I'` | `{}` | `name`：Must be at least 2 long，`email`：Required | `false` | `true` | `false` | `0` | `false` | `undefined` |
-| 3. 离开姓名字段 | `name`：Must be at least 2 long | 同步骤 2 | `false` | `true` | `false` | `0` | `false` | `undefined` |
+| 2. 在姓名中输入 `' I'` | `{}` | `name`：Must be at least 2 characters long，`email`：Required | `false` | `true` | `false` | `0` | `false` | `undefined` |
+| 3. 离开姓名字段 | `name`：Must be at least 2 characters long | 同步骤 2 | `false` | `true` | `false` | `0` | `false` | `undefined` |
 | 4. 点击“提交” | `name`、`email` —— 全部错误可见 | 同步骤 2 | `false` | `true` | `true` | `1` | `false` | `undefined` |
 | 5. 修正后服务端返回 422 | `email`：The email has already been taken. | 相同 | `false` | `true` | `true` | `2` | `false` | `{ name: 'Ivan', … }` |
 | 6. 修改邮箱后提交 | `{}` | `{}` | `true` | `false` | `true` | `3` | `true` | `{ name: 'Ivan', email: 'petr@mail.ru', age: 30 }` |

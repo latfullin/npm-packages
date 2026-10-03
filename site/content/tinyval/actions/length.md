@@ -44,7 +44,8 @@ function length(length: number, msg?: Message): Action<{ length: number }>
 ::: ru
 | Код | Когда | Сообщение по умолчанию |
 | --- | --- | --- |
-| `length` | Длина отличается | Must be exactly &#123;length&#125; long |
+| `length` | Длина строки отличается | Must be exactly &#123;length&#125; &#123;length&#124;character&#124;characters&#125; long |
+| `items` | Число элементов отличается | Must have exactly &#123;length&#125; &#123;length&#124;item&#124;items&#125; |
 
 Тексты можно поменять: см. [Сообщения и локализация](~/guide/messages).
 :::
@@ -52,7 +53,8 @@ function length(length: number, msg?: Message): Action<{ length: number }>
 ::: en
 | Code | When | Default message |
 | --- | --- | --- |
-| `length` | Length differs | Must be exactly &#123;length&#125; long |
+| `length` | String length differs | Must be exactly &#123;length&#125; &#123;length&#124;character&#124;characters&#125; long |
+| `items` | Number of items differs | Must have exactly &#123;length&#125; &#123;length&#124;item&#124;items&#125; |
 
 You can change the texts: see [Messages & i18n](~/guide/messages).
 :::
@@ -60,7 +62,8 @@ You can change the texts: see [Messages & i18n](~/guide/messages).
 ::: zh
 | 代码 | 触发条件 | 默认信息 |
 | --- | --- | --- |
-| `length` | 长度不一致 | Must be exactly &#123;length&#125; long |
+| `length` | 字符串长度不符 | Must be exactly &#123;length&#125; &#123;length&#124;character&#124;characters&#125; long |
+| `items` | 元素数量不符 | Must have exactly &#123;length&#125; &#123;length&#124;item&#124;items&#125; |
 
 可以修改这些文本：见 [错误信息与国际化](~/guide/messages)。
 :::

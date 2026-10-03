@@ -176,13 +176,13 @@ test('useFieldArray: устойчивые ключи и touched не съезж�
   const [k0, k1, k2] = keys();
   form.touch('items.2.title');
   await nextTick();
-  assert.deepEqual(form.errors, { 'items.2.title': 'Must be at least 2 long' });
+  assert.deepEqual(form.errors, { 'items.2.title': 'Must be at least 2 characters long' });
 
   items.remove(0);
   await nextTick();
   assert.deepEqual(keys(), [k1, k2]);
   assert.deepEqual(form.touched, { 'items.1.title': true });
-  assert.deepEqual(form.errors, { 'items.1.title': 'Must be at least 2 long' });
+  assert.deepEqual(form.errors, { 'items.1.title': 'Must be at least 2 characters long' });
 
   items.insert(0, { title: 'zz' });
   items.swap(0, 2);

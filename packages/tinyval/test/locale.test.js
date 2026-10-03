@@ -7,7 +7,7 @@ import ru from '../dist/locales/ru.js';
 test('русская локализация через setMessages', () => {
   setMessages(ru);
   const r = validate(object({ a: string(), b: pipe(string(), minLength(3)) }), { b: 'x' });
-  assert.deepEqual(r.errors, { a: 'Обязательное поле', b: 'Минимальная длина — 3' });
+  assert.deepEqual(r.errors, { a: 'Обязательное поле', b: 'Минимум 3 символа' });
 });
 
 test('частичное переопределение сообщений', () => {
@@ -19,7 +19,7 @@ test('китайская локализация и возврат к англи�
   const { default: zh } = await import('../dist/locales/zh.js');
   const { default: en } = await import('../dist/locales/en.js');
   setMessages(zh);
-  assert.equal(validate(pipe(string(), minLength(3)), 'x').errors[''], '长度不能少于 3');
+  assert.equal(validate(pipe(string(), minLength(3)), 'x').errors[''], '至少需要 3 个字符');
   setMessages(en);
   assert.equal(validate(string(), '').errors[''], 'Required');
 });

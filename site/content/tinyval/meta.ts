@@ -3,9 +3,9 @@ import type { PackageMeta } from '../types';
 export default {
   name: 'tinyval',
   description: {
-    ru: 'Валидация для браузера и сервера. Без зависимостей, ~3 kB, типы из схемы.',
-    en: 'Validation for browser and server. Zero dependencies, ~3 kB, types inferred from schemas.',
-    zh: '适用于浏览器和服务端的数据校验。零依赖，约 3 kB，类型从 Schema 推导。',
+    ru: 'Валидация для браузера и сервера: условия как в Laravel, ИНН и СНИЛС, файлы. Без зависимостей, ~2.5 kB, типы из схемы.',
+    en: 'Validation for browser and server: Laravel-style conditions, files, checksums. Zero dependencies, ~2.5 kB, types from schemas.',
+    zh: '适用于浏览器和服务端的数据校验：Laravel 风格的条件规则、文件、校验位。零依赖，约 2.5 kB，类型从 Schema 推导。',
   },
   intro: { ru: 'Введение', en: 'Introduction', zh: '介绍' },
   sections: [
@@ -30,7 +30,7 @@ export default {
     {
       dir: 'schemas',
       title: { ru: 'Схемы', en: 'Schemas', zh: 'Schema' },
-      pages: ['string', 'number', 'boolean', 'date', 'literal', 'oneOf', 'enumOf', 'unknown', 'object', 'array', 'tuple', 'record', 'union', 'variant', 'lazy', 'optional', 'nullable', 'fallback', 'label', 'transform', 'preprocess', 'coerce'],
+      pages: ['string', 'number', 'boolean', 'date', 'literal', 'oneOf', 'enumOf', 'unknown', 'object', 'array', 'tuple', 'record', 'union', 'variant', 'lazy', 'optional', 'nullable', 'fallback', 'label', 'file', 'brand', 'transform', 'preprocess', 'coerce'],
     },
     {
       dir: 'objects',
@@ -38,9 +38,14 @@ export default {
       pages: ['partial', 'pick', 'omit', 'extend'],
     },
     {
+      dir: 'conditions',
+      title: { ru: 'Условия', en: 'Conditions', zh: '条件' },
+      pages: ['requiredIf', 'requiredUnless', 'requiredWith', 'requiredWithout', 'prohibitedIf'],
+    },
+    {
       dir: 'actions',
       title: { ru: 'Правила и преобразования', en: 'Rules & transforms', zh: '规则与转换' },
-      pages: ['pipe', 'minLength', 'maxLength', 'length', 'min', 'max', 'integer', 'pattern', 'email', 'sameAs', 'trim', 'toLowerCase', 'toUpperCase', 'check', 'checkAsync'],
+      pages: ['pipe', 'minLength', 'maxLength', 'length', 'min', 'max', 'between', 'integer', 'pattern', 'email', 'url', 'uuid', 'startsWith', 'endsWith', 'includes', 'unique', 'minDate', 'maxDate', 'after', 'before', 'inn', 'snils', 'luhn', 'sameAs', 'trim', 'toLowerCase', 'toUpperCase', 'check', 'checkAsync'],
     },
   ],
 } satisfies PackageMeta;

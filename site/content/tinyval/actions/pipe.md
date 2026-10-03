@@ -36,8 +36,11 @@ function pipe<T>(schema: Schema<T>, ...actions: Action<T>[]): Schema<T>
 | Тип | Действия |
 | --- | --- |
 | Длина | [`minLength`](~/actions/min-length), [`maxLength`](~/actions/max-length), [`length`](~/actions/length) |
-| Числа | [`min`](~/actions/min), [`max`](~/actions/max), [`integer`](~/actions/integer) |
-| Формат | [`pattern`](~/actions/pattern), [`email`](~/actions/email) |
+| Числа | [`min`](~/actions/min), [`max`](~/actions/max), [`between`](~/actions/between), [`integer`](~/actions/integer) |
+| Формат | [`pattern`](~/actions/pattern), [`email`](~/actions/email), [`url`](~/actions/url), [`uuid`](~/actions/uuid), [`startsWith`](~/actions/starts-with), [`endsWith`](~/actions/ends-with), [`includes`](~/actions/includes) |
+| Даты | [`minDate`](~/actions/min-date), [`maxDate`](~/actions/max-date), [`after`](~/actions/after), [`before`](~/actions/before) |
+| Массивы | [`unique`](~/actions/unique) |
+| Контрольные суммы | [`inn`](~/actions/inn), [`snils`](~/actions/snils), [`luhn`](~/actions/luhn) |
 | Сравнение | [`sameAs`](~/actions/same-as) |
 | Преобразования | [`trim`](~/actions/trim), [`toLowerCase`](~/actions/to-lower-case), [`toUpperCase`](~/actions/to-upper-case) |
 | Свои | [`check`](~/actions/check), [`checkAsync`](~/actions/check-async) |
@@ -65,8 +68,11 @@ TypeScript проверяет, что правило подходит к тип�
 | Kind | Actions |
 | --- | --- |
 | Length | [`minLength`](~/actions/min-length), [`maxLength`](~/actions/max-length), [`length`](~/actions/length) |
-| Numbers | [`min`](~/actions/min), [`max`](~/actions/max), [`integer`](~/actions/integer) |
-| Format | [`pattern`](~/actions/pattern), [`email`](~/actions/email) |
+| Numbers | [`min`](~/actions/min), [`max`](~/actions/max), [`between`](~/actions/between), [`integer`](~/actions/integer) |
+| Format | [`pattern`](~/actions/pattern), [`email`](~/actions/email), [`url`](~/actions/url), [`uuid`](~/actions/uuid), [`startsWith`](~/actions/starts-with), [`endsWith`](~/actions/ends-with), [`includes`](~/actions/includes) |
+| Dates | [`minDate`](~/actions/min-date), [`maxDate`](~/actions/max-date), [`after`](~/actions/after), [`before`](~/actions/before) |
+| Arrays | [`unique`](~/actions/unique) |
+| Checksums | [`inn`](~/actions/inn), [`snils`](~/actions/snils), [`luhn`](~/actions/luhn) |
 | Comparison | [`sameAs`](~/actions/same-as) |
 | Transforms | [`trim`](~/actions/trim), [`toLowerCase`](~/actions/to-lower-case), [`toUpperCase`](~/actions/to-upper-case) |
 | Custom | [`check`](~/actions/check), [`checkAsync`](~/actions/check-async) |
@@ -94,8 +100,11 @@ Transforms inside `pipe` keep the type. To get a value of another type, use [`tr
 | 类别 | 操作 |
 | --- | --- |
 | 长度 | [`minLength`](~/actions/min-length)、[`maxLength`](~/actions/max-length)、[`length`](~/actions/length) |
-| 数字 | [`min`](~/actions/min)、[`max`](~/actions/max)、[`integer`](~/actions/integer) |
-| 格式 | [`pattern`](~/actions/pattern)、[`email`](~/actions/email) |
+| 数字 | [`min`](~/actions/min)、[`max`](~/actions/max)、[`between`](~/actions/between)、[`integer`](~/actions/integer) |
+| 格式 | [`pattern`](~/actions/pattern)、[`email`](~/actions/email)、[`url`](~/actions/url)、[`uuid`](~/actions/uuid)、[`startsWith`](~/actions/starts-with)、[`endsWith`](~/actions/ends-with)、[`includes`](~/actions/includes) |
+| 日期 | [`minDate`](~/actions/min-date)、[`maxDate`](~/actions/max-date)、[`after`](~/actions/after)、[`before`](~/actions/before) |
+| 数组 | [`unique`](~/actions/unique) |
+| 校验位 | [`inn`](~/actions/inn)、[`snils`](~/actions/snils)、[`luhn`](~/actions/luhn) |
 | 比较 | [`sameAs`](~/actions/same-as) |
 | 转换 | [`trim`](~/actions/trim)、[`toLowerCase`](~/actions/to-lower-case)、[`toUpperCase`](~/actions/to-upper-case) |
 | 自定义 | [`check`](~/actions/check)、[`checkAsync`](~/actions/check-async) |

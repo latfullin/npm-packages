@@ -158,3 +158,25 @@ void fullRu;
 const incomplete = { required: 'x' } satisfies Messages;
 void incomplete;
 expect<Equal<Extract<MessageCode, 'required' | 'minLength' | 'depth'>, 'required' | 'minLength' | 'depth'>>();
+
+// ---------- условия, file, brand
+import { brand, file, prohibitedIf, requiredIf, requiredWithout, uuid } from '../dist/index.js';
+
+const cond = object({ delivery: string(), address: requiredIf({ delivery: 'courier' }, string()), phone: requiredWithout(['email'], string()), price: prohibitedIf({ delivery: 'pickup' }, number()) });
+expect<Equal<Infer<typeof cond>, { delivery: string; address?: string | undefined; phone?: string | undefined; price?: number | undefined }>>();
+const f = file({ maxSize: 1 });
+expect<Equal<Infer<typeof f>, File>>();
+const UserId = brand(pipe(string(), uuid()), 'UserId');
+const OrderId = brand(pipe(string(), uuid()), 'OrderId');
+type UserId = Infer<typeof UserId>;
+type OrderId = Infer<typeof OrderId>;
+const takeUser = (id: UserId) => id;
+declare const orderId: OrderId;
+// @ts-expect-error — OrderId нельзя передать вместо UserId
+takeUser(orderId);
+// @ts-expect-error — обычную строку тоже нельзя
+takeUser('550e8400-e29b-41d4-a716-446655440000');
+
+// ---------- lazy по значению
+const dyn = lazy((v, { parent }) => (typeof v === 'number' || parent ? number() : number()));
+expect<Equal<Infer<typeof dyn>, number>>();
