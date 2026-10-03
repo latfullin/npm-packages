@@ -9,6 +9,7 @@ for (const key of ['window', 'document', 'Document', 'ShadowRoot', 'Node', 'Elem
 }
 
 const { attach, masks, numberMask } = await import('../dist/index.js');
+const { phoneAuto } = await import('../dist/presets.js');
 const { vMask } = await import('../dist/vue.js');
 const { createApp, h, ref, withDirectives, vModelText, nextTick, defineComponent } = await import('vue');
 
@@ -48,7 +49,7 @@ test('ввод телефона по символу', () => {
   assert.equal(el.selectionStart, el.value.length);
   assert.equal(m.raw, '79991234567');
   assert.equal(m.complete, true);
-  assert.deepEqual(states.at(-1), { value: '+7 (999) 123-45-67', raw: '79991234567', complete: true });
+  assert.deepEqual(states.at(-1), { value: '+7 (999) 123-45-67', raw: '79991234567', complete: true, valid: true });
   m.destroy();
 });
 
@@ -267,4 +268,85 @@ test('шаблон + raw: в модели только цифры', async () => 
   assert.equal(el.value, '30.12.____');
   assert.equal(model.value, '3012');
   app.unmount();
+});
+
+test('phoneAuto в поле: маска меняется при вводе кода, курсор в конце', () => {
+  const el = field();
+  const states = [];
+  const m = phoneAuto();
+  attach(el, m, { onChange: (s) => states.push(s) });
+  type(el, '+375291234567');
+  assert.equal(el.value, '+375 (29) 123-45-67');
+  assert.equal(el.selectionStart, el.value.length);
+  assert.equal(m.country(el.value).code, 'by');
+  assert.deepEqual(states.at(-1), { value: '+375 (29) 123-45-67', raw: '375291234567', complete: true, valid: true });
+  // стираем всё и вводим другую страну
+  while (el.value) backspace(el);
+  type(el, '+79991234567');
+  assert.equal(el.value, '+7 (999) 123-45-67');
+  assert.equal(m.country(el.value).code, 'ru');
+});
+
+test('phoneAuto + шаблон + raw: местный номер по умолчанию', async () => {
+  const model = ref('');
+  const { el, app } = mountInput(model, { mask: phoneAuto({ defaultCountry: 'ru' }), placeholder: '_' }, { raw: true });
+  el.focus();
+  type(el, '9991234567');
+  await nextTick();
+  assert.equal(el.value, '+7 (999) 123-45-67');
+  assert.equal(model.value, '79991234567');
+  app.unmount();
+});
+
+test('phoneAuto + шаблон: смена страны вводом +', async () => {
+  const model = ref('');
+  const { el, app } = mountInput(model, { mask: phoneAuto({ defaultCountry: 'ru' }), placeholder: '_' }, { raw: true });
+  el.focus();
+  await sleep(5);
+  assert.equal(el.value, '+7 (___) ___-__-__');
+  type(el, '+375291234567');
+  await nextTick();
+  assert.equal(el.value, '+375 (29) 123-45-67');
+  assert.equal(model.value, '375291234567');
+  app.unmount();
+});
+
+test('attach.valid и onChange в v-mask: только при изменении состояния', async () => {
+  const states = [];
+  const model = ref('');
+  const tick = ref(0);
+  const date = masks.date();
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  const app = createApp({
+    render: () =>
+      withDirectives(h('input', { 'data-tick': tick.value, 'onUpdate:modelValue': (v) => (model.value = v) }), [
+        [vModelText, model.value],
+        // объект создаётся заново при каждой перерисовке — onChange не должен зацикливаться
+        [vMask, { mask: date, onChange: (s) => states.push(s) }],
+      ]),
+  });
+  app.mount(root);
+  const el = root.querySelector('input');
+  el.focus();
+  type(el, '31022026');
+  await nextTick();
+  assert.deepEqual(states.at(-1), { value: '31.02.2026', raw: '31022026', complete: true, valid: false });
+  const count = states.length;
+  tick.value++; // перерисовка без изменений значения
+  await nextTick();
+  assert.equal(el.getAttribute('data-tick'), '1', 'перерисовка произошла');
+  assert.equal(states.length, count, 'без изменений onChange не вызывается');
+  backspace(el);
+  type(el, '5');
+  await nextTick();
+  assert.equal(el.value, '31.02.2025');
+  assert.equal(states.at(-1).valid, false);
+  app.unmount();
+
+  const field2 = field();
+  const a = attach(field2, masks.card());
+  type(field2, '4111111111111111');
+  assert.equal(a.complete, true);
+  assert.equal(a.valid, true);
 });

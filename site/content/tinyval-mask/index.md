@@ -98,7 +98,8 @@ const phoneMask = phone();
 ::: ru
 ## Что почитать
 
-- [Готовые маски](~/api/presets) — телефоны, карты, даты, документы, суммы
+- [Готовые маски](~/api/presets) — телефоны 28 стран, карты, даты, документы, суммы
+- [phoneAuto](~/api/phone-auto) — страна по коду номера, флаг и название страны
 - [Шаблоны](~/guide/patterns) — свои маски: токены, необязательные части, несколько вариантов
 - [Что возвращают маски](~/guide/values) — значение в поле, в `v-model` и в данных
 - [Поле ввода](~/guide/browser) — как работает курсор, Backspace и вставка
@@ -109,7 +110,8 @@ const phoneMask = phone();
 ::: en
 ## Further reading
 
-- [Ready-made masks](~/api/presets) — phones, cards, dates, documents, amounts
+- [Ready-made masks](~/api/presets) — phones of 28 countries, cards, dates, documents, amounts
+- [phoneAuto](~/api/phone-auto) — country by the number's code, flag and country name
 - [Patterns](~/guide/patterns) — your own masks: tokens, optional parts, several variants
 - [What masks return](~/guide/values) — the value in the field, in `v-model` and in data
 - [Input field](~/guide/browser) — how the caret, Backspace and pasting work
@@ -120,7 +122,8 @@ const phoneMask = phone();
 ::: zh
 ## 延伸阅读
 
-- [预设掩码](~/api/presets) —— 电话、银行卡、日期、证件、金额
+- [预设掩码](~/api/presets) —— 28 个国家的电话、银行卡、日期、证件、金额
+- [phoneAuto](~/api/phone-auto) —— 根据号码区号识别国家，提供国旗和国家名称
 - [模板](~/guide/patterns) —— 自定义掩码：令牌、可选部分、多个变体
 - [掩码返回什么](~/guide/values) —— 输入框、`v-model` 和数据中的值
 - [输入框](~/guide/browser) —— 光标、Backspace 和粘贴如何工作

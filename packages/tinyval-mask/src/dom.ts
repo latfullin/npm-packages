@@ -6,6 +6,8 @@ export interface MaskState {
   value: string;
   raw: string;
   complete: boolean;
+  // заполнено и правильно по смыслу — см. isValid
+  valid: boolean;
 }
 
 export interface AttachOptions {
@@ -19,6 +21,7 @@ export interface AttachOptions {
 export interface AttachedMask {
   readonly raw: string;
   readonly complete: boolean;
+  readonly valid: boolean;
   update(mask: MaskInput, options?: AttachOptions): void;
   // Переформатировать значение, которое записали в поле из кода (например, v-model), сохранив курсор
   refresh(): void;
@@ -33,6 +36,8 @@ export function attach(input: HTMLInputElement, maskInput: MaskInput, options: A
   let caretRaw: number | null = null;
   // значение с маской, которое нужно вернуть в поле после обработчиков ввода
   let restore: { value: string; start: number | null; end: number | null } | null = null;
+  // onChange — только при реальном изменении: перерисовка фреймворком не должна вызывать его снова
+  let reported: string | undefined;
 
   const focused = () => input.ownerDocument.activeElement === input;
   const rawLength = (s: string) => m.process(s).raw.length;
@@ -65,7 +70,12 @@ export function attach(input: HTMLInputElement, maskInput: MaskInput, options: A
       const pos = caretAt(r, shown, caretRaw!);
       input.setSelectionRange(pos, pos);
     }
-    opts.onChange?.({ value: r.value, raw: m.output(r), complete: r.complete });
+    const state: MaskState = { value: r.value, raw: m.output(r), complete: r.complete, valid: r.valid };
+    const key = JSON.stringify(state);
+    if (key !== reported) {
+      reported = key;
+      opts.onChange?.(state);
+    }
     return r;
   }
 
@@ -140,12 +150,26 @@ export function attach(input: HTMLInputElement, maskInput: MaskInput, options: A
     get complete() {
       return last.complete;
     },
+    get valid() {
+      return last.valid;
+    },
     update(next, nextOptions) {
       m = toMask(next);
       if (nextOptions) opts = nextOptions;
       apply(input.value, focused() ? caretRaw : null);
     },
     refresh() {
+      // фреймворк записал в поле то же, что мы отдали модели, — ничего не изменилось, возвращаем показ как был.
+      // Важно для состояний, которые модель не хранит: введённый + до кода страны, незаполненный шаблон
+      if (input.value === model(last)) {
+        const shown = display(last);
+        if (input.value !== shown) input.value = shown;
+        if (focused() && caretRaw !== null) {
+          const pos = caretAt(last, shown, caretRaw);
+          input.setSelectionRange(pos, pos);
+        }
+        return;
+      }
       apply(input.value, focused() ? caretRaw : null);
     },
     destroy() {

@@ -12,6 +12,8 @@ export interface MaskResult {
   raw: string;
   // Все обязательные позиции заполнены
   complete: boolean;
+  // Значение заполнено и правильное по смыслу: дата существует, контрольная сумма сходится
+  valid: boolean;
   // Позиции введённых символов в value — по ним ставится курсор
   slots: number[];
   // Во вводе остались символы, которые не поместились в шаблон
@@ -35,6 +37,8 @@ export interface MaskOptions {
   prepare?: (input: string) => string;
   // Можно ли принять символ, учитывая уже введённое: так дата не пропустит 32-е число
   allow?: (raw: string, char: string) => boolean;
+  // Правильно ли заполненное значение: проверка даты, контрольной суммы. Вызывается, только когда маска заполнена
+  validate?: (result: MaskResult) => boolean;
   output?: (result: MaskResult) => string;
 }
 
@@ -127,7 +131,7 @@ function run(els: Element[], input: string, allow?: MaskOptions['allow']): MaskR
     if ('t' in el && (!el.opt || started.has(el.opt))) complete = false;
   }
   const overflow = [...input.slice(i)].some(accepts);
-  return { value: value.slice(0, end), raw, complete, slots, overflow };
+  return { value: value.slice(0, end), raw, complete, valid: complete, slots, overflow };
 }
 
 export function createMask(options: MaskOptions | string | readonly string[]): Mask {
@@ -156,7 +160,11 @@ export function createMask(options: MaskOptions | string | readonly string[]): M
     return picked;
   };
   return {
-    process: (input) => pick(input)[1],
+    process(input) {
+      const r = pick(input)[1];
+      if (r.complete && o.validate) r.valid = o.validate(r);
+      return r;
+    },
     output: o.output ?? ((r) => r.raw),
     // необязательные части в шаблон не входят: они появляются, только когда их начали вводить
     template: (input, placeholder) =>
@@ -179,3 +187,6 @@ export function unmask(value: string, m: MaskInput): string {
 }
 
 export const isComplete = (value: string, m: MaskInput): boolean => toMask(m).process(String(value ?? '')).complete;
+
+// Заполнено и правильно по смыслу: isValid('31.02.2026', date()) → false
+export const isValid = (value: string, m: MaskInput): boolean => toMask(m).process(String(value ?? '')).valid;

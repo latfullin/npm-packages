@@ -13,24 +13,28 @@ A mask is about how a value **looks**, validation is about whether it's **correc
 ::: ru
 ## Проверить, что маска заполнена
 
-[`isComplete`](~/api/mask) — все обязательные позиции заполнены:
+[`isComplete`](~/api/mask) — все обязательные позиции заполнены. [`isValid`](~/api/mask) — заполнено и правильно по смыслу (что именно проверяется — в [Готовых масках](~/api/presets#что-проверяет-valid)):
 :::
 
 ::: en
 ## Check that the mask is filled
 
-[`isComplete`](~/api/mask) — all required positions are filled:
+[`isComplete`](~/api/mask) — all required positions are filled. [`isValid`](~/api/mask) — filled and correct (what exactly is checked — in [Ready-made masks](~/api/presets#what-valid-checks)):
 :::
 
 ::: zh
 ## 检查掩码是否填写完整
 
-[`isComplete`](~/api/mask) —— 所有必填位置都已填写：
+[`isComplete`](~/api/mask) —— 所有必填位置都已填写。[`isValid`](~/api/mask) —— 已填写且正确（具体检查内容见 [预设掩码](~/api/presets)）：
 :::
 
 ```ts
 isComplete('+7 (999) 123-45', phone());    // false
 isComplete('+7 (999) 123-45-67', phone()); // true
+
+// filled and correct
+isValid('31.02.2026', date());              // false — no such date
+isValid('4111 1111 1111 1112', card());     // false — wrong check digit
 ```
 
 ::: ru

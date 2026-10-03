@@ -3,11 +3,12 @@
 //   v-mask="phoneMask"                                — маска, в v-model значение с маской
 //   v-mask.raw="phoneMask"                            — в v-model значение без маски: 79991234567
 //   v-mask="{ mask: phoneMask, placeholder: '_' }"    — видимый шаблон +7 (___) ___-__-__
+//   v-mask="{ mask, onChange: (s) => (ok = s.valid) }" — состояние поля: заполнено ли, правильно ли
 import type { Directive, DirectiveBinding } from 'vue';
 import type { MaskInput } from './core.js';
 import { attach, type AttachedMask, type AttachOptions } from './dom.js';
 
-export type MaskBinding = MaskInput | ({ mask: MaskInput } & Omit<AttachOptions, 'onChange'>);
+export type MaskBinding = MaskInput | ({ mask: MaskInput } & AttachOptions);
 
 const KEY = Symbol('tinyval-mask');
 type El = HTMLElement & { [KEY]?: AttachedMask };
@@ -17,7 +18,7 @@ const findInput = (el: HTMLElement) => (el.tagName === 'INPUT' ? (el as HTMLInpu
 
 function parse({ value, modifiers }: DirectiveBinding<MaskBinding>): [MaskInput, AttachOptions] {
   const o = value && typeof value === 'object' && 'mask' in value ? value : { mask: value as MaskInput };
-  return [o.mask, { placeholder: o.placeholder, raw: !!(modifiers.raw || o.raw) }];
+  return [o.mask, { placeholder: o.placeholder, raw: !!(modifiers.raw || o.raw), onChange: o.onChange }];
 }
 
 export const vMask: Directive<HTMLElement, MaskBinding> = {
