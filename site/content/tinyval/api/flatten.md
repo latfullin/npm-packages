@@ -64,7 +64,7 @@ app.post('/users', (req, res) => {
   } catch (e) {
     if (e instanceof ValidationError) {
       return res.status(422).json({ message: 'The given data was invalid.', errors: flatten(e.issues) });
-      // { "errors": { "password": ["Must be at least 8 long", "Invalid format"] } }
+      // { "errors": { "password": ["Must be at least 8 characters long", "Invalid format"] } }
     }
     throw e;
   }

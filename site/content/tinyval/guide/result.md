@@ -177,14 +177,14 @@ validate(Order, { name: 'I', email: 'bad', age: '15', items: [{ title: 'Book', q
   "valid": false,
   "data": undefined,
   "errors": {
-    "name": "Must be at least 2 long",
+    "name": "Must be at least 2 characters long",
     "email": "Invalid email",
     "age": "Must be at least 18",
     "items.0.qty": "Must be at least 1",
     "items.1.title": "Required"
   },
   "issues": [
-    { "code": "minLength", "path": ["name"], "params": { "min": 2 }, "message": "Must be at least 2 long" },
+    { "code": "minLength", "path": ["name"], "params": { "min": 2 }, "message": "Must be at least 2 characters long" },
     { "code": "email", "path": ["email"], "params": {}, "message": "Invalid email" },
     { "code": "min", "path": ["age"], "params": { "min": 18 }, "message": "Must be at least 18" },
     { "code": "min", "path": ["items", 0, "qty"], "params": { "min": 1 }, "message": "Must be at least 1" },
@@ -271,8 +271,8 @@ By default a field has one error. With the `{ all: true }` option `issues` gets 
 ```ts
 const r = validate(object({ password: pipe(string(), minLength(8), email()) }), { password: 'abc' }, { all: true });
 
-r.errors;           // { password: 'Must be at least 8 long' }
-flatten(r.issues);  // { password: ['Must be at least 8 long', 'Invalid email'] }
+r.errors;           // { password: 'Must be at least 8 characters long' }
+flatten(r.issues);  // { password: ['Must be at least 8 characters long', 'Invalid email'] }
 ```
 
 ::: ru
@@ -298,8 +298,8 @@ try {
   parse(Order, { name: 'I' });
 } catch (e) {
   e instanceof ValidationError; // true
-  e.message; // 'name: Must be at least 2 long; email: Required; items: Required'
-  e.errors;  // { name: 'Must be at least 2 long', email: 'Required', items: 'Required' }
+  e.message; // 'name: Must be at least 2 characters long; email: Required; items: Required'
+  e.errors;  // { name: 'Must be at least 2 characters long', email: 'Required', items: 'Required' }
   e.issues;  // [{ code, path, params, message }, …]
 }
 ```
@@ -325,7 +325,7 @@ Through `schema['~standard'].validate` the result follows the [standard](~/guide
 ```json
 {
   "issues": [
-    { "message": "Must be at least 2 long", "path": ["name"] },
+    { "message": "Must be at least 2 characters long", "path": ["name"] },
     { "message": "Required", "path": ["email"] },
     { "message": "Required", "path": ["items"] }
   ]

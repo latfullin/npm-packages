@@ -99,7 +99,7 @@ const even = check<number>((v) => v % 2 === 0, 'Должно быть чётны
 | `Result<T>` | Результат [`validate`](~/api/validate) |
 | `Issue` | Ошибка: `{ code, message, path, params }` |
 | `Message` | Строка или функция `(params) => string` |
-| `Options` | Опции проверки: `{ all?, messages?, labels?, maxDepth? }` — см. [validate](~/api/validate) |
+| `Options` | Опции проверки: `{ all?, abortEarly?, messages?, labels?, maxDepth? }` — см. [validate](~/api/validate) |
 | `Action<T>` | Правило или преобразование для [`pipe`](~/actions/pipe) |
 | `Info` | Второй аргумент [`check`](~/actions/check): `{ parent, root }` |
 :::
@@ -133,7 +133,7 @@ const even = check<number>((v) => v % 2 === 0, 'Must be even');
 | `Result<T>` | The result of [`validate`](~/api/validate) |
 | `Issue` | An error: `{ code, message, path, params }` |
 | `Message` | A string or a function `(params) => string` |
-| `Options` | Validation options: `{ all?, messages?, labels?, maxDepth? }` — see [validate](~/api/validate) |
+| `Options` | Validation options: `{ all?, abortEarly?, messages?, labels?, maxDepth? }` — see [validate](~/api/validate) |
 | `Action<T>` | A rule or transform for [`pipe`](~/actions/pipe) |
 | `Info` | The second argument of [`check`](~/actions/check): `{ parent, root }` |
 :::
@@ -167,7 +167,7 @@ const even = check<number>((v) => v % 2 === 0, '必须是偶数');
 | `Result<T>` | [`validate`](~/api/validate) 的结果 |
 | `Issue` | 错误：`{ code, message, path, params }` |
 | `Message` | 字符串或函数 `(params) => string` |
-| `Options` | 校验选项：`{ all?, messages?, labels?, maxDepth? }` —— 见 [validate](~/api/validate) |
+| `Options` | 校验选项：`{ all?, abortEarly?, messages?, labels?, maxDepth? }` —— 见 [validate](~/api/validate) |
 | `Action<T>` | [`pipe`](~/actions/pipe) 的规则或转换 |
 | `Info` | [`check`](~/actions/check) 的第二个参数：`{ parent, root }` |
 :::

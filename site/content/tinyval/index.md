@@ -1,7 +1,7 @@
 ::: ru
 Маленькая и быстрая валидация без зависимостей — для браузера и сервера.
 
-- ~1.6 kB gzip для типичной формы, ~3.2 kB весь пакет — в сборку попадает только то, что импортировано
+- ~2.5 kB gzip для типичной формы, ~5.5 kB весь пакет — в сборку попадает только то, что импортировано
 - Типы TypeScript выводятся из схемы
 - Вложенные объекты и массивы, лишние поля, приведение типов, преобразования, асинхронные проверки
 
@@ -11,7 +11,7 @@
 ::: en
 Tiny, fast, zero-dependency validation for browser and server.
 
-- ~1.6 kB gzip for a typical form, ~3.2 kB for everything — only what you import ends up in the bundle
+- ~2.5 kB gzip for a typical form, ~5.5 kB for everything — only what you import ends up in the bundle
 - TypeScript types inferred from the schema
 - Nested objects and arrays, unknown keys handling, coercion, transforms, async checks
 
@@ -21,7 +21,7 @@ Tiny, fast, zero-dependency validation for browser and server.
 ::: zh
 小巧、快速、零依赖的数据校验库 —— 适用于浏览器和服务端。
 
-- 典型表单约 1.6 kB gzip，整个包约 3.2 kB —— 只有导入的部分才会进入打包结果
+- 典型表单约 2.5 kB gzip，整个包约 5.5 kB —— 只有导入的部分才会进入打包结果
 - TypeScript 类型从 Schema 推导
 - 嵌套对象和数组、多余字段处理、类型转换、数据转换、异步检查
 
@@ -77,6 +77,7 @@ if (result.valid) {
 | --- | --- |
 | [Функции](~/api/validate) | Запуск проверки: [`validate`](~/api/validate), [`validateAsync`](~/api/validate-async), [`parse`](~/api/parse), [`parseAsync`](~/api/parse-async) |
 | [Схемы](~/schemas/string) | Типы данных: [`string`](~/schemas/string), [`number`](~/schemas/number), [`object`](~/schemas/object), [`array`](~/schemas/array), [`optional`](~/schemas/optional), [`union`](~/schemas/union), [`variant`](~/schemas/variant), [`coerce`](~/schemas/coerce)… |
+| [Условия](~/conditions/required-if) | Как в Laravel: [`requiredIf`](~/conditions/required-if), [`requiredWith`](~/conditions/required-with), [`requiredWithout`](~/conditions/required-without), [`prohibitedIf`](~/conditions/prohibited-if) |
 | [Операции с объектами](~/objects/partial) | Новые схемы из существующих: [`partial`](~/objects/partial), [`pick`](~/objects/pick), [`omit`](~/objects/omit), [`extend`](~/objects/extend) |
 | [Правила](~/actions/pipe) | Проверки и преобразования через [`pipe`](~/actions/pipe): [`minLength`](~/actions/min-length), [`email`](~/actions/email), [`sameAs`](~/actions/same-as), [`trim`](~/actions/trim), [`check`](~/actions/check)… |
 
@@ -122,6 +123,7 @@ On the server [`parse`](~/api/parse) is handier — it returns the data or throw
 | --- | --- |
 | [Functions](~/api/validate) | Running validation: [`validate`](~/api/validate), [`validateAsync`](~/api/validate-async), [`parse`](~/api/parse), [`parseAsync`](~/api/parse-async) |
 | [Schemas](~/schemas/string) | Data types: [`string`](~/schemas/string), [`number`](~/schemas/number), [`object`](~/schemas/object), [`array`](~/schemas/array), [`optional`](~/schemas/optional), [`union`](~/schemas/union), [`variant`](~/schemas/variant), [`coerce`](~/schemas/coerce)… |
+| [Conditions](~/conditions/required-if) | Like Laravel: [`requiredIf`](~/conditions/required-if), [`requiredWith`](~/conditions/required-with), [`requiredWithout`](~/conditions/required-without), [`prohibitedIf`](~/conditions/prohibited-if) |
 | [Object helpers](~/objects/partial) | New schemas from existing ones: [`partial`](~/objects/partial), [`pick`](~/objects/pick), [`omit`](~/objects/omit), [`extend`](~/objects/extend) |
 | [Rules](~/actions/pipe) | Checks and transforms via [`pipe`](~/actions/pipe): [`minLength`](~/actions/min-length), [`email`](~/actions/email), [`sameAs`](~/actions/same-as), [`trim`](~/actions/trim), [`check`](~/actions/check)… |
 
@@ -167,6 +169,7 @@ if (result.valid) {
 | --- | --- |
 | [函数](~/api/validate) | 执行校验：[`validate`](~/api/validate)、[`validateAsync`](~/api/validate-async)、[`parse`](~/api/parse)、[`parseAsync`](~/api/parse-async) |
 | [Schema](~/schemas/string) | 数据类型：[`string`](~/schemas/string)、[`number`](~/schemas/number)、[`object`](~/schemas/object)、[`array`](~/schemas/array)、[`optional`](~/schemas/optional)、[`union`](~/schemas/union)、[`variant`](~/schemas/variant)、[`coerce`](~/schemas/coerce)… |
+| [条件](~/conditions/required-if) | 类似 Laravel：[`requiredIf`](~/conditions/required-if)、[`requiredWith`](~/conditions/required-with)、[`requiredWithout`](~/conditions/required-without)、[`prohibitedIf`](~/conditions/prohibited-if) |
 | [对象操作](~/objects/partial) | 基于已有 Schema 创建新 Schema：[`partial`](~/objects/partial)、[`pick`](~/objects/pick)、[`omit`](~/objects/omit)、[`extend`](~/objects/extend) |
 | [规则](~/actions/pipe) | 通过 [`pipe`](~/actions/pipe) 进行检查和转换：[`minLength`](~/actions/min-length)、[`email`](~/actions/email)、[`sameAs`](~/actions/same-as)、[`trim`](~/actions/trim)、[`check`](~/actions/check)… |
 

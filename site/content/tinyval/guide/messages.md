@@ -29,6 +29,25 @@ const plural = (n: number) => (n % 10 === 1 && n % 100 !== 11 ? 'символ' :
 minLength(5, (p) => `Минимум ${p.min} ${plural(p.min as number)}`) // → «Минимум 5 символов»
 ```
 
+## Склонения: «3 символа», «5 символов»
+
+Форма слова, зависящая от числа, пишется в фигурных скобках через `|`: сначала параметр, потом формы. Форма выбирается по правилам языка (`Intl.PluralRules`), язык берётся из ключа `$locale` в lang-файле:
+
+```ts
+setMessages({
+  minLength: 'Минимум {min} {min|символ|символа|символов}',
+});
+// 1 символ, 2 символа, 5 символов, 21 символ
+```
+
+| Язык | Сколько форм | Пример |
+| --- | --- | --- |
+| Русский, украинский | 3: одна, несколько, много | `{n\|файл\|файла\|файлов}` |
+| Английский, немецкий | 2: одна, много | `{n\|file\|files}` |
+| Китайский, японский | 1 | `{n\|个}` или просто текст без форм |
+
+Встроенные русская и английская локали уже используют склонения. Если форм указано меньше, чем нужно языку, берётся последняя.
+
 ## Сообщения для всего приложения
 
 [`setMessages`](~/api/set-messages) меняет тексты по умолчанию. Вызовите один раз при старте приложения:
@@ -109,19 +128,40 @@ validate(Signup, body).issues;
 | `object` | [`object`](~/schemas/object) | Must be an object | Должно быть объектом |
 | `array` | [`array`](~/schemas/array) | Must be an array | Должно быть списком |
 | `literal` | [`literal`](~/schemas/literal) | Must be &#123;expected&#125; | Должно быть &#123;expected&#125; |
-| `oneOf` | [`oneOf`](~/schemas/one-of) | Must be one of: &#123;options&#125; | Допустимые значения: &#123;options&#125; |
+| `oneOf` | [`oneOf`](~/schemas/one-of), [`enumOf`](~/schemas/enum-of) | Must be one of: &#123;options&#125; | Допустимые значения: &#123;options&#125; |
 | `union` | [`union`](~/schemas/union) | Does not match any allowed type | Значение не подходит ни под один из вариантов |
 | `variant` | [`variant`](~/schemas/variant) | Unknown type, expected one of: &#123;options&#125; | Неизвестный тип, допустимые: &#123;options&#125; |
 | `depth` | [`lazy`](~/schemas/lazy) | Too deeply nested (max &#123;max&#125;) | Слишком глубокая вложенность (максимум &#123;max&#125;) |
 | `unknownKey` | [`object`](~/schemas/object) с `unknown: 'strict'` | Unknown field | Неизвестное поле |
-| `minLength` | [`minLength`](~/actions/min-length) | Must be at least &#123;min&#125; long | Минимальная длина — &#123;min&#125; |
-| `maxLength` | [`maxLength`](~/actions/max-length) | Must be at most &#123;max&#125; long | Максимальная длина — &#123;max&#125; |
-| `length` | [`length`](~/actions/length) | Must be exactly &#123;length&#125; long | Длина должна быть &#123;length&#125; |
+| `minLength` | [`minLength`](~/actions/min-length) у строки | Must be at least &#123;min&#125; &#123;min&#124;character&#124;characters&#125; long | Минимум &#123;min&#125; &#123;min&#124;символ&#124;символа&#124;символов&#125; |
+| `maxLength` | [`maxLength`](~/actions/max-length) у строки | Must be at most &#123;max&#125; &#123;max&#124;character&#124;characters&#125; long | Максимум &#123;max&#125; &#123;max&#124;символ&#124;символа&#124;символов&#125; |
+| `length` | [`length`](~/actions/length) у строки | Must be exactly &#123;length&#125; &#123;length&#124;character&#124;characters&#125; long | Должно быть &#123;length&#125; &#123;length&#124;символ&#124;символа&#124;символов&#125; |
 | `min` | [`min`](~/actions/min) | Must be at least &#123;min&#125; | Не меньше &#123;min&#125; |
 | `max` | [`max`](~/actions/max) | Must be at most &#123;max&#125; | Не больше &#123;max&#125; |
 | `integer` | [`integer`](~/actions/integer) | Must be an integer | Должно быть целым числом |
 | `pattern` | [`pattern`](~/actions/pattern) | Invalid format | Неверный формат |
 | `email` | [`email`](~/actions/email) | Invalid email | Некорректный email |
+| `minItems` | [`minLength`](~/actions/min-length) у массива | Must have at least &#123;min&#125; &#123;min&#124;item&#124;items&#125; | Минимум &#123;min&#125; &#123;min&#124;элемент&#124;элемента&#124;элементов&#125; |
+| `maxItems` | [`maxLength`](~/actions/max-length) у массива | Must have at most &#123;max&#125; &#123;max&#124;item&#124;items&#125; | Максимум &#123;max&#125; &#123;max&#124;элемент&#124;элемента&#124;элементов&#125; |
+| `items` | [`length`](~/actions/length) у массива, [`tuple`](~/schemas/tuple) | Must have exactly &#123;length&#125; &#123;length&#124;item&#124;items&#125; | Должно быть &#123;length&#125; &#123;length&#124;элемент&#124;элемента&#124;элементов&#125; |
+| `between` | [`between`](~/actions/between) | Must be between &#123;min&#125; and &#123;max&#125; | От &#123;min&#125; до &#123;max&#125; |
+| `url` | [`url`](~/actions/url) | Invalid URL | Некорректная ссылка |
+| `uuid` | [`uuid`](~/actions/uuid) | Invalid UUID | Некорректный UUID |
+| `startsWith` | [`startsWith`](~/actions/starts-with) | Must start with "&#123;value&#125;" | Должно начинаться с «&#123;value&#125;» |
+| `endsWith` | [`endsWith`](~/actions/ends-with) | Must end with "&#123;value&#125;" | Должно заканчиваться на «&#123;value&#125;» |
+| `includes` | [`includes`](~/actions/includes) | Must contain "&#123;value&#125;" | Должно содержать «&#123;value&#125;» |
+| `unique` | [`unique`](~/actions/unique) | Must not contain duplicates | Значения не должны повторяться |
+| `minDate` | [`minDate`](~/actions/min-date) | Must be on or after &#123;date&#125; | Не раньше &#123;date&#125; |
+| `maxDate` | [`maxDate`](~/actions/max-date) | Must be on or before &#123;date&#125; | Не позже &#123;date&#125; |
+| `after` | [`after`](~/actions/after) | Must be after &#123;field&#125; | Должно быть позже, чем &#123;field&#125; |
+| `before` | [`before`](~/actions/before) | Must be before &#123;field&#125; | Должно быть раньше, чем &#123;field&#125; |
+| `inn` | [`inn`](~/actions/inn) | Invalid INN | Некорректный ИНН |
+| `snils` | [`snils`](~/actions/snils) | Invalid SNILS | Некорректный СНИЛС |
+| `luhn` | [`luhn`](~/actions/luhn) | Invalid card number | Некорректный номер карты |
+| `prohibited` | [`prohibitedIf`](~/conditions/prohibited-if) | Must be empty | Поле должно быть пустым |
+| `file` | [`file`](~/schemas/file) | Must be a file | Выберите файл |
+| `fileSize` | [`file`](~/schemas/file) — maxSize | File must be at most &#123;max&#125; | Файл не больше &#123;max&#125; |
+| `fileType` | [`file`](~/schemas/file) — types | File type must be one of: &#123;types&#125; | Допустимые типы файлов: &#123;types&#125; |
 | `sameAs` | [`sameAs`](~/actions/same-as) | Must match &#123;field&#125; | Значения не совпадают |
 
 Своё сообщение с параметрами, которых нет в таблице, тоже работает — неизвестный `{параметр}` остаётся в тексте как есть.
@@ -155,6 +195,25 @@ If you need logic (e.g. plurals), pass a function — it receives the parameters
 ```ts
 minLength(5, (p) => `At least ${p.min} character${p.min === 1 ? '' : 's'}`)
 ```
+
+## Plural forms: "1 character", "5 characters"
+
+A word form that depends on a number is written in curly braces with `|`: the parameter first, then the forms. The form is chosen by the language rules (`Intl.PluralRules`); the language comes from the `$locale` key of the lang file:
+
+```ts
+setMessages({
+  minLength: 'Must be at least {min} {min|character|characters} long',
+});
+// 1 character, 2 characters
+```
+
+| Language | Number of forms | Example |
+| --- | --- | --- |
+| Russian, Ukrainian | 3: one, few, many | `{n\|файл\|файла\|файлов}` |
+| English, German | 2: one, other | `{n\|file\|files}` |
+| Chinese, Japanese | 1 | `{n\|个}` or plain text without forms |
+
+The built-in English and Russian locales already use plural forms. If fewer forms are given than the language needs, the last one is used.
 
 ## Messages for the whole app
 
@@ -236,19 +295,40 @@ To customize the texts, copy a lang file into your project with `npx tinyval lan
 | `object` | [`object`](~/schemas/object) | Must be an object |
 | `array` | [`array`](~/schemas/array) | Must be an array |
 | `literal` | [`literal`](~/schemas/literal) | Must be &#123;expected&#125; |
-| `oneOf` | [`oneOf`](~/schemas/one-of) | Must be one of: &#123;options&#125; |
+| `oneOf` | [`oneOf`](~/schemas/one-of), [`enumOf`](~/schemas/enum-of) | Must be one of: &#123;options&#125; |
 | `union` | [`union`](~/schemas/union) | Does not match any allowed type |
 | `variant` | [`variant`](~/schemas/variant) | Unknown type, expected one of: &#123;options&#125; |
 | `depth` | [`lazy`](~/schemas/lazy) | Too deeply nested (max &#123;max&#125;) |
 | `unknownKey` | [`object`](~/schemas/object) with `unknown: 'strict'` | Unknown field |
-| `minLength` | [`minLength`](~/actions/min-length) | Must be at least &#123;min&#125; long |
-| `maxLength` | [`maxLength`](~/actions/max-length) | Must be at most &#123;max&#125; long |
-| `length` | [`length`](~/actions/length) | Must be exactly &#123;length&#125; long |
+| `minLength` | [`minLength`](~/actions/min-length) on a string | Must be at least &#123;min&#125; &#123;min&#124;character&#124;characters&#125; long |
+| `maxLength` | [`maxLength`](~/actions/max-length) on a string | Must be at most &#123;max&#125; &#123;max&#124;character&#124;characters&#125; long |
+| `length` | [`length`](~/actions/length) on a string | Must be exactly &#123;length&#125; &#123;length&#124;character&#124;characters&#125; long |
 | `min` | [`min`](~/actions/min) | Must be at least &#123;min&#125; |
 | `max` | [`max`](~/actions/max) | Must be at most &#123;max&#125; |
 | `integer` | [`integer`](~/actions/integer) | Must be an integer |
 | `pattern` | [`pattern`](~/actions/pattern) | Invalid format |
 | `email` | [`email`](~/actions/email) | Invalid email |
+| `minItems` | [`minLength`](~/actions/min-length) on an array | Must have at least &#123;min&#125; &#123;min&#124;item&#124;items&#125; |
+| `maxItems` | [`maxLength`](~/actions/max-length) on an array | Must have at most &#123;max&#125; &#123;max&#124;item&#124;items&#125; |
+| `items` | [`length`](~/actions/length) on an array, [`tuple`](~/schemas/tuple) | Must have exactly &#123;length&#125; &#123;length&#124;item&#124;items&#125; |
+| `between` | [`between`](~/actions/between) | Must be between &#123;min&#125; and &#123;max&#125; |
+| `url` | [`url`](~/actions/url) | Invalid URL |
+| `uuid` | [`uuid`](~/actions/uuid) | Invalid UUID |
+| `startsWith` | [`startsWith`](~/actions/starts-with) | Must start with "&#123;value&#125;" |
+| `endsWith` | [`endsWith`](~/actions/ends-with) | Must end with "&#123;value&#125;" |
+| `includes` | [`includes`](~/actions/includes) | Must contain "&#123;value&#125;" |
+| `unique` | [`unique`](~/actions/unique) | Must not contain duplicates |
+| `minDate` | [`minDate`](~/actions/min-date) | Must be on or after &#123;date&#125; |
+| `maxDate` | [`maxDate`](~/actions/max-date) | Must be on or before &#123;date&#125; |
+| `after` | [`after`](~/actions/after) | Must be after &#123;field&#125; |
+| `before` | [`before`](~/actions/before) | Must be before &#123;field&#125; |
+| `inn` | [`inn`](~/actions/inn) | Invalid INN |
+| `snils` | [`snils`](~/actions/snils) | Invalid SNILS |
+| `luhn` | [`luhn`](~/actions/luhn) | Invalid card number |
+| `prohibited` | [`prohibitedIf`](~/conditions/prohibited-if) | Must be empty |
+| `file` | [`file`](~/schemas/file) | Must be a file |
+| `fileSize` | [`file`](~/schemas/file) — maxSize | File must be at most &#123;max&#125; |
+| `fileType` | [`file`](~/schemas/file) — types | File type must be one of: &#123;types&#125; |
 | `sameAs` | [`sameAs`](~/actions/same-as) | Must match &#123;field&#125; |
 
 Unknown `{params}` in your own messages stay in the text as is.
@@ -282,6 +362,25 @@ oneOf(['a', 'b'], '请选择：{options}') // → “请选择：a, b”
 ```ts
 minLength(5, (p) => `至少需要 ${p.min} 个字符`)
 ```
+
+## 复数形式：“1 character”、“5 characters”
+
+随数字变化的词形写在花括号中，用 `|` 分隔：先写参数，再写各个形式。形式按语言规则选择（`Intl.PluralRules`），语言取自语言文件中的 `$locale` 键：
+
+```ts
+setMessages({
+  minLength: 'Must be at least {min} {min|character|characters} long',
+});
+// 1 character, 2 characters
+```
+
+| 语言 | 形式数量 | 示例 |
+| --- | --- | --- |
+| 俄语、乌克兰语 | 3：单数、少数、多数 | `{n\|файл\|файла\|файлов}` |
+| 英语、德语 | 2：单数、其他 | `{n\|file\|files}` |
+| 中文、日语 | 1 | `{n\|个}` 或不带形式的普通文本 |
+
+内置的英语和俄语语言包已经使用了复数形式。如果给出的形式少于语言所需，则使用最后一个。
 
 ## 整个应用的信息
 
@@ -354,7 +453,7 @@ validate(Signup, body).issues;
 
 | 代码 | 来源 | 英文（默认） | `tinyval/locales/zh` |
 | --- | --- | --- | --- |
-| `invalid` | [`check`](~/actions/check)、[`checkAsync`](~/actions/check-async) | Invalid value | 无效的值 |
+| `invalid` | [`check`](~/actions/check), [`checkAsync`](~/actions/check-async) | Invalid value | 无效的值 |
 | `required` | 任意 Schema 中的空值 | Required | 此项为必填项 |
 | `string` | [`string`](~/schemas/string) | Must be a string | 必须是字符串 |
 | `number` | [`number`](~/schemas/number) | Must be a number | 必须是数字 |
@@ -363,19 +462,40 @@ validate(Signup, body).issues;
 | `object` | [`object`](~/schemas/object) | Must be an object | 必须是对象 |
 | `array` | [`array`](~/schemas/array) | Must be an array | 必须是数组 |
 | `literal` | [`literal`](~/schemas/literal) | Must be &#123;expected&#125; | 必须是 &#123;expected&#125; |
-| `oneOf` | [`oneOf`](~/schemas/one-of) | Must be one of: &#123;options&#125; | 必须是以下值之一：&#123;options&#125; |
+| `oneOf` | [`oneOf`](~/schemas/one-of), [`enumOf`](~/schemas/enum-of) | Must be one of: &#123;options&#125; | 必须是以下值之一：&#123;options&#125; |
 | `union` | [`union`](~/schemas/union) | Does not match any allowed type | 不符合任何允许的类型 |
 | `variant` | [`variant`](~/schemas/variant) | Unknown type, expected one of: &#123;options&#125; | 未知类型，允许的值：&#123;options&#125; |
 | `depth` | [`lazy`](~/schemas/lazy) | Too deeply nested (max &#123;max&#125;) | 嵌套层级过深（最多 &#123;max&#125;） |
 | `unknownKey` | 使用 `unknown: 'strict'` 的 [`object`](~/schemas/object) | Unknown field | 未知字段 |
-| `minLength` | [`minLength`](~/actions/min-length) | Must be at least &#123;min&#125; long | 长度不能少于 &#123;min&#125; |
-| `maxLength` | [`maxLength`](~/actions/max-length) | Must be at most &#123;max&#125; long | 长度不能超过 &#123;max&#125; |
-| `length` | [`length`](~/actions/length) | Must be exactly &#123;length&#125; long | 长度必须为 &#123;length&#125; |
+| `minLength` | 字符串的 [`minLength`](~/actions/min-length) | Must be at least &#123;min&#125; &#123;min&#124;character&#124;characters&#125; long | 至少需要 &#123;min&#125; 个字符 |
+| `maxLength` | 字符串的 [`maxLength`](~/actions/max-length) | Must be at most &#123;max&#125; &#123;max&#124;character&#124;characters&#125; long | 最多 &#123;max&#125; 个字符 |
+| `length` | 字符串的 [`length`](~/actions/length) | Must be exactly &#123;length&#125; &#123;length&#124;character&#124;characters&#125; long | 必须为 &#123;length&#125; 个字符 |
 | `min` | [`min`](~/actions/min) | Must be at least &#123;min&#125; | 不能小于 &#123;min&#125; |
 | `max` | [`max`](~/actions/max) | Must be at most &#123;max&#125; | 不能大于 &#123;max&#125; |
 | `integer` | [`integer`](~/actions/integer) | Must be an integer | 必须是整数 |
 | `pattern` | [`pattern`](~/actions/pattern) | Invalid format | 格式无效 |
 | `email` | [`email`](~/actions/email) | Invalid email | 邮箱地址无效 |
+| `minItems` | 数组的 [`minLength`](~/actions/min-length) | Must have at least &#123;min&#125; &#123;min&#124;item&#124;items&#125; | 至少需要 &#123;min&#125; 项 |
+| `maxItems` | 数组的 [`maxLength`](~/actions/max-length) | Must have at most &#123;max&#125; &#123;max&#124;item&#124;items&#125; | 最多 &#123;max&#125; 项 |
+| `items` | 数组的 [`length`](~/actions/length)、[`tuple`](~/schemas/tuple) | Must have exactly &#123;length&#125; &#123;length&#124;item&#124;items&#125; | 必须为 &#123;length&#125; 项 |
+| `between` | [`between`](~/actions/between) | Must be between &#123;min&#125; and &#123;max&#125; | 必须在 &#123;min&#125; 到 &#123;max&#125; 之间 |
+| `url` | [`url`](~/actions/url) | Invalid URL | 链接无效 |
+| `uuid` | [`uuid`](~/actions/uuid) | Invalid UUID | UUID 无效 |
+| `startsWith` | [`startsWith`](~/actions/starts-with) | Must start with "&#123;value&#125;" | 必须以“&#123;value&#125;”开头 |
+| `endsWith` | [`endsWith`](~/actions/ends-with) | Must end with "&#123;value&#125;" | 必须以“&#123;value&#125;”结尾 |
+| `includes` | [`includes`](~/actions/includes) | Must contain "&#123;value&#125;" | 必须包含“&#123;value&#125;” |
+| `unique` | [`unique`](~/actions/unique) | Must not contain duplicates | 不能包含重复的值 |
+| `minDate` | [`minDate`](~/actions/min-date) | Must be on or after &#123;date&#125; | 不能早于 &#123;date&#125; |
+| `maxDate` | [`maxDate`](~/actions/max-date) | Must be on or before &#123;date&#125; | 不能晚于 &#123;date&#125; |
+| `after` | [`after`](~/actions/after) | Must be after &#123;field&#125; | 必须晚于 &#123;field&#125; |
+| `before` | [`before`](~/actions/before) | Must be before &#123;field&#125; | 必须早于 &#123;field&#125; |
+| `inn` | [`inn`](~/actions/inn) | Invalid INN | INN（俄罗斯税号）无效 |
+| `snils` | [`snils`](~/actions/snils) | Invalid SNILS | SNILS 无效 |
+| `luhn` | [`luhn`](~/actions/luhn) | Invalid card number | 卡号无效 |
+| `prohibited` | [`prohibitedIf`](~/conditions/prohibited-if) | Must be empty | 此项必须为空 |
+| `file` | [`file`](~/schemas/file) | Must be a file | 请选择文件 |
+| `fileSize` | [`file`](~/schemas/file) — maxSize | File must be at most &#123;max&#125; | 文件不能超过 &#123;max&#125; |
+| `fileType` | [`file`](~/schemas/file) — types | File type must be one of: &#123;types&#125; | 允许的文件类型：&#123;types&#125; |
 | `sameAs` | [`sameAs`](~/actions/same-as) | Must match &#123;field&#125; | 必须与 &#123;field&#125; 一致 |
 
 自定义信息中的未知 `{参数}` 会原样保留在文本中。

@@ -46,7 +46,7 @@ function tuple<const T extends readonly Schema[]>(items: T, msg?: Message): Sche
 | --- | --- | --- |
 | `required` | Значение пустое | Required |
 | `array` | Не массив | Must be an array |
-| `length` | Другое число элементов | Must be exactly &#123;length&#125; long |
+| `items` | Другое число элементов | Must have exactly &#123;length&#125; &#123;length&#124;item&#124;items&#125; |
 :::
 
 ::: en
@@ -54,7 +54,7 @@ function tuple<const T extends readonly Schema[]>(items: T, msg?: Message): Sche
 | --- | --- | --- |
 | `required` | The value is empty | Required |
 | `array` | Not an array | Must be an array |
-| `length` | Wrong number of items | Must be exactly &#123;length&#125; long |
+| `items` | Wrong number of items | Must have exactly &#123;length&#125; &#123;length&#124;item&#124;items&#125; |
 :::
 
 ::: zh
@@ -62,7 +62,7 @@ function tuple<const T extends readonly Schema[]>(items: T, msg?: Message): Sche
 | --- | --- | --- |
 | `required` | 值为空 | Required |
 | `array` | 不是数组 | Must be an array |
-| `length` | 元素数量不符 | Must be exactly &#123;length&#125; long |
+| `items` | 元素数量不符 | Must have exactly &#123;length&#125; &#123;length&#124;item&#124;items&#125; |
 :::
 
 ## @t(examples)
@@ -84,7 +84,7 @@ const point = tuple([pipe(number(), min(-90), max(90)), pipe(number(), min(-180)
 // [number, number]
 
 validate(point, [55.75, 37.62]).valid; // true
-validate(point, [55.75]).errors;       // { '': 'Must be exactly 2 long' }
+validate(point, [55.75]).errors;       // { '': 'Must have exactly 2 items' }
 validate(point, [100, 0]).errors;      // { 0: 'Must be at most 90' }
 ```
 
