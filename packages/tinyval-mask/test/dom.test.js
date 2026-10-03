@@ -4,13 +4,13 @@ import assert from 'node:assert/strict';
 import { Window } from 'happy-dom';
 
 const window = new Window();
-for (const key of ['window', 'document', 'Node', 'Element', 'HTMLElement', 'SVGElement', 'Event', 'InputEvent', 'MathMLElement']) {
+for (const key of ['window', 'document', 'Document', 'ShadowRoot', 'Node', 'Element', 'HTMLElement', 'SVGElement', 'Event', 'InputEvent', 'MathMLElement']) {
   globalThis[key] = key === 'window' ? window : window[key];
 }
 
 const { attach, masks, numberMask } = await import('../dist/index.js');
 const { vMask } = await import('../dist/vue.js');
-const { createApp, h, ref, withDirectives, vModelText, nextTick } = await import('vue');
+const { createApp, h, ref, withDirectives, vModelText, nextTick, defineComponent } = await import('vue');
 
 function field() {
   const el = document.createElement('input');
@@ -139,5 +139,132 @@ test('v-mask на обёртке находит input внутри', () => {
   el.focus();
   type(el, '1234');
   assert.equal(el.value, '12-34');
+  app.unmount();
+});
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+function mountInput(model, binding, modifiers = {}) {
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  const app = createApp({
+    render: () =>
+      withDirectives(h('input', { 'onUpdate:modelValue': (v) => (model.value = v) }), [
+        [vModelText, model.value],
+        [vMask, binding, undefined, modifiers],
+      ]),
+  });
+  app.mount(root);
+  return { el: root.querySelector('input'), app };
+}
+
+test('v-mask.raw: в модели значение без маски, в поле — с маской', async () => {
+  const model = ref('');
+  const { el, app } = mountInput(model, masks.phone(), { raw: true });
+  el.focus();
+  type(el, '89991234567');
+  await nextTick();
+  assert.equal(model.value, '79991234567');
+  assert.equal(el.value, '+7 (999) 123-45-67');
+  assert.equal(el.selectionStart, el.value.length);
+  app.unmount();
+});
+
+test('v-mask.raw: правка в середине — курсор остаётся после перерисовки', async () => {
+  const model = ref('');
+  const { el, app } = mountInput(model, masks.phone(), { raw: true });
+  el.focus();
+  type(el, '9991234567');
+  await nextTick();
+  el.setSelectionRange(6, 6); // после «+7 (99»
+  type(el, '5');
+  await nextTick();
+  assert.equal(model.value, '79959123456');
+  assert.equal(el.value, '+7 (995) 912-34-56');
+  assert.equal(el.selectionStart, 7);
+  app.unmount();
+});
+
+test('v-mask.raw: значение из кода показывается с маской', async () => {
+  const model = ref('79991234567');
+  const { el, app } = mountInput(model, masks.phone(), { raw: true });
+  assert.equal(el.value, '+7 (999) 123-45-67');
+  model.value = '79000000000';
+  await nextTick();
+  assert.equal(el.value, '+7 (900) 000-00-00');
+  model.value = '';
+  await nextTick();
+  assert.equal(el.value, '');
+  app.unmount();
+});
+
+test('v-mask.raw на компоненте поля и для чисел', async () => {
+  const Field = defineComponent({
+    props: ['modelValue'],
+    emits: ['update:modelValue'],
+    setup: (props, { emit }) => () => h('input', { value: props.modelValue, onInput: (e) => emit('update:modelValue', e.target.value) }),
+  });
+  const model = ref('');
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  const app = createApp({
+    render: () =>
+      withDirectives(h(Field, { modelValue: model.value, 'onUpdate:modelValue': (v) => (model.value = v) }), [
+        [vMask, numberMask(), undefined, { raw: true }],
+      ]),
+  });
+  app.mount(root);
+  const el = root.querySelector('input');
+  el.focus();
+  type(el, '1234567,5');
+  await nextTick();
+  assert.equal(model.value, '1234567.5');
+  assert.equal(el.value, '1 234 567,5');
+  app.unmount();
+});
+
+test('шаблон: виден при фокусе, курсор на первой пустой позиции, пустое поле очищается', async () => {
+  const model = ref('');
+  const { el, app } = mountInput(model, { mask: masks.phone(), placeholder: '_' });
+  assert.equal(el.value, '', 'до фокуса шаблона нет');
+  el.focus();
+  await sleep(5);
+  assert.equal(el.value, '+7 (___) ___-__-__');
+  assert.equal(el.selectionStart, 4);
+  type(el, '999');
+  await nextTick();
+  assert.equal(el.value, '+7 (999) ___-__-__');
+  assert.equal(el.selectionStart, 7);
+  assert.equal(model.value, '+7 (999', 'в модели — без шаблона');
+  backspace(el);
+  await nextTick();
+  assert.equal(el.value, '+7 (99_) ___-__-__');
+  el.blur();
+  assert.equal(el.value, '+7 (99_) ___-__-__', 'частично заполненное поле сохраняет шаблон');
+  el.focus();
+  el.setSelectionRange(el.value.length, el.value.length);
+  backspace(el);
+  backspace(el);
+  await nextTick();
+  el.blur();
+  assert.equal(el.value, '', 'пустое поле после ухода очищается');
+  app.unmount();
+});
+
+test('шаблон + raw: в модели только цифры', async () => {
+  const model = ref('');
+  const { el, app } = mountInput(model, { mask: masks.date(), placeholder: '_' }, { raw: true });
+  el.focus();
+  await sleep(5);
+  assert.equal(el.value, '__.__.____');
+  type(el, '3505');
+  await nextTick();
+  // 3 — день; 5 после 3 невозможна и пропускается; 0 — второй знак дня; 5 как первая цифра месяца невозможна
+  assert.equal(el.value, '30.__.____');
+  assert.equal(model.value, '30');
+  type(el, '12');
+  await nextTick();
+  assert.equal(el.value, '30.12.____');
+  assert.equal(model.value, '3012');
   app.unmount();
 });

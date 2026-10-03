@@ -21,6 +21,7 @@ What the mask functions return and what ends up in the field, in `v-model` and i
 | `m.process(value)` | Всё сразу — объект `MaskResult`, см. ниже | |
 | [`attach`](~/api/attach) → `onChange` | `{ value, raw, complete }` при каждом изменении поля | |
 | [`v-mask`](~/api/v-mask) + `v-model` | В модели — строка **с маской** | `'+7 (999) 123-45-67'` |
+| [`v-mask.raw`](~/api/v-mask) + `v-model` | В модели — значение **без маски**, как у `unmask` | `'79991234567'` |
 
 Все функции возвращают **строки**: даже числовая маска отдаёт `'1234.5'`, а не `1234.5` — чтобы не терять ведущие нули и точность. Число получают через `Number(...)` или [`coerce.number`](@/tinyval/schemas/coerce).
 :::
@@ -36,6 +37,7 @@ What the mask functions return and what ends up in the field, in `v-model` and i
 | `m.process(value)` | Everything at once — a `MaskResult` object, see below | |
 | [`attach`](~/api/attach) → `onChange` | `{ value, raw, complete }` on every field change | |
 | [`v-mask`](~/api/v-mask) + `v-model` | The model holds the string **with the mask** | `'+7 (999) 123-45-67'` |
+| [`v-mask.raw`](~/api/v-mask) + `v-model` | The model holds the **unmasked** value, like `unmask` | `'79991234567'` |
 
 All functions return **strings**: even the number mask returns `'1234.5'`, not `1234.5` — so leading zeros and precision aren't lost. Get a number with `Number(...)` or [`coerce.number`](@/tinyval/schemas/coerce).
 :::
@@ -51,6 +53,7 @@ All functions return **strings**: even the number mask returns `'1234.5'`, not `
 | `m.process(value)` | 一次返回全部信息 —— `MaskResult` 对象，见下文 | |
 | [`attach`](~/api/attach) → `onChange` | 每次输入框变化时得到 `{ value, raw, complete }` | |
 | [`v-mask`](~/api/v-mask) + `v-model` | 模型中是**带掩码**的字符串 | `'+7 (999) 123-45-67'` |
+| [`v-mask.raw`](~/api/v-mask) + `v-model` | 模型中是**去掉掩码**的值，与 `unmask` 相同 | `'79991234567'` |
 
 所有函数都返回**字符串**：即使是数字掩码也返回 `'1234.5'` 而不是 `1234.5` —— 以免丢失前导零和精度。如需数字，请使用 `Number(...)` 或 [`coerce.number`](@/tinyval/schemas/coerce)。
 :::
@@ -185,7 +188,7 @@ Why `raw` and `unmask` differ: `raw` is the mask's internal value (the caret is 
 | Где | Значение |
 | --- | --- |
 | В `<input>` | `+7 (999) 123-45-67` |
-| В `v-model` | `'+7 (999) 123-45-67'` — то же, что в поле |
+| В `v-model` | `'+7 (999) 123-45-67'` — то же, что в поле; с `v-mask.raw` — `'79991234567'` |
 | В `onChange` у `attach` | `{ value: '+7 (999) 123-45-67', raw: '79991234567', complete: true }` — здесь `raw` уже результат `unmask` |
 | В данных для сервера | `'79991234567'` — после `unmask` в схеме, см. [Маски и валидация](~/guide/validation) |
 
@@ -200,7 +203,7 @@ With [`v-mask`](~/api/v-mask) or [`attach`](~/api/attach):
 | Where | Value |
 | --- | --- |
 | In the `<input>` | `+7 (999) 123-45-67` |
-| In `v-model` | `'+7 (999) 123-45-67'` — the same as in the field |
+| In `v-model` | `'+7 (999) 123-45-67'` — the same as in the field; with `v-mask.raw` — `'79991234567'` |
 | In `attach`'s `onChange` | `{ value: '+7 (999) 123-45-67', raw: '79991234567', complete: true }` — here `raw` is already the `unmask` result |
 | In data for the server | `'79991234567'` — after `unmask` in the schema, see [Masks & validation](~/guide/validation) |
 
@@ -215,7 +218,7 @@ The model keeps the masked value on purpose: the field and the model always matc
 | 位置 | 值 |
 | --- | --- |
 | `<input>` 中 | `+7 (999) 123-45-67` |
-| `v-model` 中 | `'+7 (999) 123-45-67'` —— 与输入框中相同 |
+| `v-model` 中 | `'+7 (999) 123-45-67'` —— 与输入框中相同；使用 `v-mask.raw` 时为 `'79991234567'` |
 | `attach` 的 `onChange` 中 | `{ value: '+7 (999) 123-45-67', raw: '79991234567', complete: true }` —— 这里的 `raw` 已经是 `unmask` 的结果 |
 | 发送给服务端的数据中 | `'79991234567'` —— 在 Schema 中经过 `unmask` 之后，见 [掩码与校验](~/guide/validation) |
 

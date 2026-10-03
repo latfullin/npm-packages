@@ -54,6 +54,8 @@ test('телефон РФ: 8 и 7 в начале, вставка в любом 
     assert.equal(unmask(v, p), '79991234567', v);
   }
   assert.equal(mask('8', p), '+7');
+  assert.equal(unmask('+7 (', p), '', 'один префикс — пустое значение');
+  assert.equal(unmask('8', p), '');
   assert.equal(mask('+7 (8', p), '+7 (8', 'с + восьмёрка — уже код города');
   assert.equal(isComplete('+7 (999) 123-45-6', p), false);
   assert.equal(isComplete('+7 (999) 123-45-67', p), true);
@@ -142,4 +144,32 @@ test('null и undefined не ломают функции', () => {
   assert.equal(mask(undefined, masks.phone()), '');
   assert.equal(unmask(null, masks.card()), '');
   assert.equal(mask(undefined, numberMask()), '');
+});
+
+test('даты и время: невозможные цифры не вводятся', () => {
+  const d = masks.date();
+  assert.equal(mask('3205', d), '30', '32-го числа нет: 2 пропущена');
+  assert.equal(mask('3112', d), '31.12');
+  assert.equal(mask('0000', d), '0', '00 число не вводится');
+  assert.equal(mask('01132026', d), '01.12.026', '13-го месяца нет');
+  assert.equal(mask('2902', d), '29.02', 'существование даты проверяет валидация');
+  assert.equal(mask('2026-13-40', masks.date('yyyy-mm-dd')), '2026-10', '3 и 4 после 1 в месяце невозможны и пропускаются');
+  assert.equal(mask('2359', masks.time()), '23:59');
+  assert.equal(mask('2460', masks.time()), '20', '24 и 60 не вводятся');
+  assert.equal(mask('235960', masks.time(true)), '23:59:0');
+  assert.equal(mask('1326', masks.cardExpiry()), '12/6');
+  assert.equal(mask('311220262359', masks.datetime()), '31.12.2026 23:59');
+});
+
+test('allow в своей маске', () => {
+  const even = createMask({ pattern: '9999', allow: (_, ch) => Number(ch) % 2 === 0 });
+  assert.equal(mask('123456', even), '246');
+});
+
+test('template: шаблон с заполнителем', () => {
+  assert.equal(masks.phone().template('', '_'), '+7 (___) ___-__-__');
+  assert.equal(masks.card().template('3782', '_'), '____ ______ _____', 'шаблон Amex');
+  assert.equal(masks.card().template('4276', '_'), '____ ____ ____ ____');
+  assert.equal(masks.inn().template('', '•'), '••••••••••', 'необязательная часть не показывается');
+  assert.equal(numberMask().template, undefined, 'у числовой маски шаблона нет');
 });

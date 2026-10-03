@@ -175,7 +175,8 @@ Phones, cards, amounts and dates are easier to type with a mask — the [tinyval
 :::
 
 ```vue
-<TvField name="phone" v-mask="phoneMask" inputmode="tel" />
+<!-- the form gets 79991234567, the field shows +7 (999) 123-45-67 -->
+<TvField name="phone" v-mask.raw="{ mask: phoneMask, placeholder: '_' }" inputmode="tel" />
 ```
 
 ::: ru

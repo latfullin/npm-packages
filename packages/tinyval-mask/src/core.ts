@@ -22,6 +22,8 @@ export interface Mask {
   process(input: string): MaskResult;
   // Значение для данных (unmask): по умолчанию raw
   output(result: MaskResult): string;
+  // Шаблон для показа: позиции для ввода заменены символом-заполнителем: '+7 (___) ___-__-__'
+  template?(input: string, placeholder: string): string;
 }
 
 export type Pattern = string | readonly string[] | ((input: string) => string);
@@ -31,6 +33,8 @@ export interface MaskOptions {
   tokens?: Record<string, Token>;
   // Подготовка ввода перед форматированием: например, 8 → 7 в начале номера
   prepare?: (input: string) => string;
+  // Можно ли принять символ, учитывая уже введённое: так дата не пропустит 32-е число
+  allow?: (raw: string, char: string) => boolean;
   output?: (result: MaskResult) => string;
 }
 
@@ -67,7 +71,7 @@ const test = (t: Token, ch: string) => {
   return t.pattern.test(ch);
 };
 
-function run(els: Element[], input: string): MaskResult {
+function run(els: Element[], input: string, allow?: MaskOptions['allow']): MaskResult {
   let value = '';
   let raw = '';
   let i = 0;
@@ -109,7 +113,7 @@ function run(els: Element[], input: string): MaskResult {
       continue;
     }
     // символы, которые сюда не подходят, пропускаются
-    while (i < input.length && !test(el.t, input[i])) i++;
+    while (i < input.length && !(test(el.t, input[i]) && (!allow || allow(raw, apply(el.t, input[i]))))) i++;
     if (i >= input.length) break;
     slots.push(value.length);
     if (el.opt) started.add(el.opt);
@@ -136,19 +140,30 @@ export function createMask(options: MaskOptions | string | readonly string[]): M
     return els;
   };
   const patterns = typeof o.pattern === 'function' ? null : (Array.isArray(o.pattern) ? o.pattern : [o.pattern]) as string[];
+  // шаблон под этот ввод и результат: несколько шаблонов — первый, в который ввод помещается целиком
+  const pick = (input: string): [Element[], MaskResult] => {
+    const s = o.prepare ? o.prepare(input) : input;
+    if (!patterns) {
+      const els = get((o.pattern as (input: string) => string)(s));
+      return [els, run(els, s, o.allow)];
+    }
+    let picked!: [Element[], MaskResult];
+    for (const p of patterns) {
+      const els = get(p);
+      picked = [els, run(els, s, o.allow)];
+      if (!picked[1].overflow) break;
+    }
+    return picked;
+  };
   return {
-    process(input) {
-      const s = o.prepare ? o.prepare(input) : input;
-      if (!patterns) return run(get((o.pattern as (input: string) => string)(s)), s);
-      // несколько шаблонов: первый, в который ввод помещается целиком
-      let r!: MaskResult;
-      for (const p of patterns) {
-        r = run(get(p), s);
-        if (!r.overflow) break;
-      }
-      return r;
-    },
+    process: (input) => pick(input)[1],
     output: o.output ?? ((r) => r.raw),
+    // необязательные части в шаблон не входят: они появляются, только когда их начали вводить
+    template: (input, placeholder) =>
+      pick(input)[0]
+        .filter((e) => !e.opt)
+        .map((e) => ('t' in e ? placeholder : e.c))
+        .join(''),
   };
 }
 

@@ -1,9 +1,10 @@
 # tinyval-mask
 
-Tiny zero-dependency input masks: phones, bank cards, dates, amounts, documents and custom patterns. ~1 kB gzip for a custom pattern, ~1.6 kB with a phone mask and an input binding.
+Tiny zero-dependency input masks: phones, bank cards, dates, amounts, documents and custom patterns. ~1 kB gzip for a custom pattern, ~2 kB with a phone mask and an input binding.
 
 - The caret doesn't jump, Backspace goes through brackets and dashes, paste works in any format
 - Pure `mask` / `unmask` work on the server too (normalize phone numbers)
+- Visible template `+7 (___) ___-__-__`, date masks reject day 32 and month 13
 - `v-mask` directive for Vue (`tinyval-mask/vue`)
 
 ## Install
@@ -26,6 +27,8 @@ mask('12ab34', '99-99');               // '12-34'
 isComplete('+7 (999) 123', phone());   // false
 
 attach(document.querySelector('#phone'), phone(), {
+  placeholder: '_',  // show +7 (___) ___-__-__
+  raw: true,         // input handlers get 79991234567
   onChange: ({ value, raw, complete }) => {},
 });
 ```
@@ -64,7 +67,9 @@ const phoneMask = phone();
 </script>
 
 <template>
-  <input v-model="tel" v-mask="phoneMask" />
+  <input v-model="tel" v-mask="phoneMask" />                                   <!-- '+7 (999) 123-45-67' -->
+  <input v-model="tel" v-mask.raw="phoneMask" />                               <!-- '79991234567' -->
+  <input v-model="tel" v-mask.raw="{ mask: phoneMask, placeholder: '_' }" />   <!-- +7 (___) ___-__-__ -->
 </template>
 ```
 

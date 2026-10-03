@@ -28,10 +28,14 @@ const fields = {
 };
 const values = ref({ phone: '', card: '', money: '', date: '', plate: '', number: '' });
 const brand = computed(() => cardBrand(values.value.card));
-const rows = computed(() => [
-  { key: 'phone', mask: phoneMask.value },
-  ...Object.entries(fields).map(([key, mask]) => ({ key, mask })),
-]);
+// у масок фиксированной длины — видимый шаблон с заполнителем _
+const withTemplate = ['phone', 'card', 'date', 'plate'];
+const rows = computed(() =>
+  [{ key: 'phone', mask: phoneMask.value }, ...Object.entries(fields).map(([key, mask]) => ({ key, mask }))].map((r) => ({
+    ...r,
+    binding: withTemplate.includes(r.key) ? { mask: r.mask, placeholder: '_' } : r.mask,
+  })),
+);
 </script>
 
 <template>
@@ -42,7 +46,7 @@ const rows = computed(() => [
         <select v-if="row.key === 'phone'" v-model="country" aria-label="country">
           <option v-for="c in countries" :key="c" :value="c">{{ c.toUpperCase() }}</option>
         </select>
-        <input :id="`mask-${row.key}`" v-model="values[row.key as keyof typeof values]" v-mask="row.mask" inputmode="text" />
+        <input :id="`mask-${row.key}`" v-model="values[row.key as keyof typeof values]" v-mask="row.binding" inputmode="text" />
         <span v-if="row.key === 'card' && brand !== 'unknown'" class="mask-demo__brand">{{ brand }}</span>
       </div>
       <code class="mask-demo__raw">

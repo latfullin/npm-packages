@@ -47,7 +47,7 @@ import { masks } from 'tinyval-mask';                      // masks.phone(), mas
 | `time()`, `time(true)` | `09:30`, `09:30:15` |
 | `datetime()` | `02.10.2026 15:30` |
 
-Маска не проверяет, существует ли дата, — это задача валидации: [`coerce.date`](@/tinyval/schemas/coerce) в tinyval.
+Невозможные цифры не вводятся: 32-е число, 13-й месяц, 25-й час, 60 минут, `00.00`. То же у `cardExpiry` для месяца. Существует ли дата целиком (31 февраля), проверяет валидация: [`coerce.date`](@/tinyval/schemas/coerce) в tinyval.
 
 ## Документы и реквизиты РФ
 
@@ -112,7 +112,7 @@ For Russia and Kazakhstan a leading `7` or `8` is treated as the country code: `
 | `time()`, `time(true)` | `09:30`, `09:30:15` |
 | `datetime()` | `02.10.2026 15:30` |
 
-The mask doesn't check whether the date exists — that's validation: [`coerce.date`](@/tinyval/schemas/coerce) in tinyval.
+Impossible digits can't be typed: day 32, month 13, hour 25, minute 60, `00.00`. `cardExpiry` does the same for the month. Whether the whole date exists (February 31) is checked by validation: [`coerce.date`](@/tinyval/schemas/coerce) in tinyval.
 
 ## Russian documents and bank details
 
@@ -177,7 +177,7 @@ They accept all [`numberMask`](~/api/number-mask) options.
 | `time()`、`time(true)` | `09:30`、`09:30:15` |
 | `datetime()` | `02.10.2026 15:30` |
 
-掩码不检查日期是否真实存在 —— 这属于校验：使用 tinyval 的 [`coerce.date`](@/tinyval/schemas/coerce)。
+无法输入不可能的数字：32 日、13 月、25 时、60 分、`00.00`。`cardExpiry` 的月份同样如此。整个日期是否存在（2 月 31 日）由校验负责：使用 tinyval 的 [`coerce.date`](@/tinyval/schemas/coerce)。
 
 ## 俄罗斯证件与银行信息
 
