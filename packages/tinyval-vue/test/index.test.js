@@ -157,7 +157,7 @@ test('bind: для компонентов UI-библиотек', async () => {
   assert.equal(form.values.address.city, 'M');
   field.onBlur();
   await nextTick();
-  assert.deepEqual(form.errors, { 'address.city': 'Must be at least 2 long' });
+  assert.deepEqual(form.errors, { 'address.city': 'Must be at least 2 characters long' });
 });
 
 test('массивы: touch родителя показывает ошибки элементов', async () => {

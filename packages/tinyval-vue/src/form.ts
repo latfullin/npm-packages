@@ -7,7 +7,7 @@ import { changes, clone, getPath, setPath, snapshot, within } from './utils.js';
 
 type DeepPartial<T> = T extends Date | unknown[] ? T : T extends object ? { [K in keyof T]?: DeepPartial<T[K]> } : T;
 
-export interface FormOptions<V> extends Omit<Options, 'all'> {
+export interface FormOptions<V> extends Omit<Options, 'all' | 'abortEarly'> {
   // Начальные значения полей — то, что привязывается к v-model
   initial: V;
   // Когда показывать ошибки: после ухода с поля (по умолчанию), сразу при вводе или только после отправки
