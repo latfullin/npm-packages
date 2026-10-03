@@ -55,7 +55,7 @@ test('ошибки по полям, первая ошибка на поле', ()
   assert.equal(r.valid, false);
   assert.equal(r.data, undefined);
   assert.deepEqual(r.errors, {
-    name: 'Must be at least 2 long',
+    name: 'Must be at least 2 characters long',
     email: 'Invalid email',
     age: 'Must be at least 0',
   });
@@ -203,7 +203,7 @@ test('parse и parseAsync', async () => {
   assert.deepEqual(parse(user, { name: 'Ivan', email: 'a@a.ru' }), { name: 'Ivan', email: 'a@a.ru' });
   assert.throws(
     () => parse(user, { name: 'I', email: 'a@a.ru' }),
-    (e) => e instanceof ValidationError && e.errors.name === 'Must be at least 2 long' && /name: /.test(e.message),
+    (e) => e instanceof ValidationError && e.errors.name === 'Must be at least 2 characters long' && /name: /.test(e.message),
   );
   await assert.rejects(parseAsync(user, {}), ValidationError);
 });

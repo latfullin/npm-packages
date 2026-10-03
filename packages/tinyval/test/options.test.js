@@ -27,10 +27,10 @@ const User = object({ name: pipe(string(), minLength(3)), age: pipe(number(), mi
 
 test('сообщения для одного вызова не меняют глобальные', () => {
   assert.deepEqual(validate(User, { name: 'a', age: 1 }, { messages: ru }).errors, {
-    name: 'Минимальная длина — 3',
+    name: 'Минимум 3 символа',
     age: 'Не меньше 18',
   });
-  assert.equal(validate(User, { name: 'a', age: 20 }).errors.name, 'Must be at least 3 long');
+  assert.equal(validate(User, { name: 'a', age: 20 }).errors.name, 'Must be at least 3 characters long');
 });
 
 test('параллельные запросы на разных языках не мешают друг другу', async () => {

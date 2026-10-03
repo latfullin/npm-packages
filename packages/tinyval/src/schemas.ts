@@ -96,7 +96,10 @@ export function object<S extends Shape>(shape: S, opts: ObjectOptions = {}): Obj
     let ok = true;
     for (const k of keys) {
       const r = shape[k].run(has(input, k) ? input[k] : undefined, ctx, { k, p: path }, input);
-      if (r === FAIL) ok = false;
+      if (r === FAIL) {
+        if (ctx.abort) return FAIL;
+        ok = false;
+      }
       else if (r !== undefined) out[k] = r;
       else if (mode === 'passthrough') delete out[k];
     }
@@ -104,6 +107,7 @@ export function object<S extends Shape>(shape: S, opts: ObjectOptions = {}): Obj
       for (const k in input) {
         if (has(input, k) && !has(shape, k)) {
           fail(ctx, { k, p: path }, 'unknownKey');
+          if (ctx.abort) return FAIL;
           ok = false;
         }
       }
@@ -121,7 +125,10 @@ export function array<T>(item: Schema<T>, msg?: Message): Schema<T[]> {
     let ok = true;
     for (let i = 0; i < v.length; i++) {
       const r = item.run(v[i], ctx, { k: i, p: path }, v);
-      if (r === FAIL) ok = false;
+      if (r === FAIL) {
+        if (ctx.abort) return FAIL;
+        ok = false;
+      }
       else out[i] = r;
     }
     return ok ? out : FAIL;
@@ -136,12 +143,15 @@ export function tuple<const T extends readonly Schema<any>[]>(
   return createSchema((v, ctx, path) => {
     if (isEmpty(v)) return fail(ctx, path, 'required', msg);
     if (!Array.isArray(v)) return fail(ctx, path, 'array', msg);
-    if (v.length !== items.length) return fail(ctx, path, 'length', msg, { length: items.length });
+    if (v.length !== items.length) return fail(ctx, path, 'items', msg, { length: items.length });
     const out: unknown[] = new Array(v.length);
     let ok = true;
     for (let i = 0; i < items.length; i++) {
       const r = items[i].run(v[i], ctx, { k: i, p: path }, v);
-      if (r === FAIL) ok = false;
+      if (r === FAIL) {
+        if (ctx.abort) return FAIL;
+        ok = false;
+      }
       else out[i] = r;
     }
     return ok ? (out as { -readonly [I in keyof T]: Infer<T[I]> }) : FAIL;
@@ -167,7 +177,10 @@ export function record(a: Schema, b?: Schema | Message, c?: Message): Schema<Rec
       const p = { k, p: path };
       const rk = key ? key.run(k, ctx, p, input) : k;
       const r = value.run(input[k], ctx, p, input);
-      if (rk === FAIL || r === FAIL) ok = false;
+      if (rk === FAIL || r === FAIL) {
+        if (ctx.abort) return FAIL;
+        ok = false;
+      }
       else put(out, rk as string, r);
     }
     return ok ? out : FAIL;
@@ -220,15 +233,15 @@ export const transform = <T, U>(schema: Schema<T>, fn: (value: T) => U): Schema<
 export const preprocess = <T>(fn: (value: unknown) => unknown, schema: Schema<T>): Schema<T> =>
   createSchema((v, ctx, path, parent) => schema.run(fn(v), ctx, path, parent));
 
-// Рекурсивная схема: const Category: Schema<Category> = object({ children: array(lazy(() => Category)) })
-export function lazy<T>(getter: () => Schema<T>): Schema<T> {
-  let schema: Schema<T> | undefined;
+// Схема, которая выбирается при проверке: рекурсия — lazy(() => Category),
+// или по значению и соседним полям — lazy((value, { parent }) => …)
+export function lazy<T>(getter: (value: unknown, info: { parent: unknown; root: unknown }) => Schema<T>): Schema<T> {
   return createSchema((v, ctx, path, parent) => {
     // защита от слишком глубоких данных: без неё запрос может уронить сервер переполнением стека
     if (ctx.depth >= ctx.maxDepth) return fail(ctx, path, 'depth', undefined, { max: ctx.maxDepth });
     ctx.depth++;
     try {
-      return (schema ??= getter()).run(v, ctx, path, parent);
+      return getter(v, { parent, root: ctx.root }).run(v, ctx, path, parent);
     } finally {
       ctx.depth--;
     }
@@ -252,3 +265,51 @@ export function fallback<T>(schema: Schema<T>, value: T | ((input: unknown) => T
     return r;
   });
 }
+
+// ---------- файлы
+
+export interface FileOptions {
+  // Максимальный размер в байтах: 2 * 1024 * 1024
+  maxSize?: number;
+  // MIME-типы и расширения: ['image/*', 'application/pdf', '.docx']
+  types?: string[];
+}
+
+const bytes = (n: number) => {
+  const units = ['B', 'KB', 'MB', 'GB'];
+  let i = 0;
+  while (n >= 1024 && i < units.length - 1) {
+    n /= 1024;
+    i++;
+  }
+  return `${Math.round(n * 10) / 10} ${units[i]}`;
+};
+
+const typeMatches = (f: Blob & { name?: string }, t: string) =>
+  t.startsWith('.')
+    ? (f.name ?? '').toLowerCase().endsWith(t.toLowerCase())
+    : t.endsWith('/*')
+      ? f.type.startsWith(t.slice(0, -1))
+      : f.type === t;
+
+// Файл из <input type="file"> или FormData: file({ maxSize: 2 * 1024 * 1024, types: ['image/*'] })
+export function file(options: FileOptions = {}, msg?: Message): Schema<File> {
+  return createSchema((v, ctx, path) => {
+    if (isEmpty(v)) return fail(ctx, path, 'required', msg);
+    if (typeof Blob === 'undefined' || !(v instanceof Blob)) return fail(ctx, path, 'file', msg);
+    if (options.maxSize !== undefined && v.size > options.maxSize) {
+      return fail(ctx, path, 'fileSize', msg, { max: bytes(options.maxSize), size: bytes(v.size) });
+    }
+    if (options.types && !options.types.some((t) => typeMatches(v, t))) {
+      return fail(ctx, path, 'fileType', msg, { types: options.types.join(', ') });
+    }
+    return v as File;
+  });
+}
+
+// ---------- брендированные типы
+
+export type Brand<B extends string> = { readonly '~brand': B };
+
+// Тип с «меткой»: brand(pipe(string(), uuid()), 'UserId') — TypeScript не даст передать OrderId вместо UserId
+export const brand = <T, B extends string>(schema: Schema<T>, _name: B): Schema<T & Brand<B>> => schema as Schema<T & Brand<B>>;
