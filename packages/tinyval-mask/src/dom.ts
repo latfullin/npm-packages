@@ -83,8 +83,19 @@ export function attach(input: HTMLInputElement, maskInput: MaskInput, options: A
 
   // capture — раньше обработчиков фреймворка: они читают уже обработанное значение
   const onInput = () => {
-    const c = input.selectionStart ?? input.value.length;
-    const r = apply(input.value, rawLength(input.value.slice(0, c)));
+    let v = input.value;
+    let c = input.selectionStart ?? v.length;
+    // вставка в пустое поле — вставленный текст и есть значение: 8 999 … в шаблон +7 (___) … даёт +7 (999) …, а не +7 (899) …
+    if (!last.raw) {
+      const prev = display(last);
+      let p = 0;
+      while (p < prev.length && p < v.length && prev[p] === v[p]) p++;
+      let q = 0;
+      while (q < prev.length - p && q < v.length - p && prev[prev.length - 1 - q] === v[v.length - 1 - q]) q++;
+      const chunk = v.slice(p, v.length - q);
+      if (chunk.length > 1) c = (v = chunk).length;
+    }
+    const r = apply(v, rawLength(v.slice(0, c)));
     const value = model(r);
     if (value !== input.value) {
       // на время обработчиков в поле — значение для данных (без маски или без шаблона)

@@ -268,6 +268,28 @@ test('шаблон: выделение сразу после фокуса сох
   app.unmount();
 });
 
+test('шаблон: вставка номера с 8 в пустое поле — это +7, ввод 8 по одной цифре — часть номера', async () => {
+  const model = ref('');
+  const { el, app } = mountInput(model, { mask: masks.phoneAuto({ defaultCountry: 'ru' }), placeholder: '_' });
+  el.focus();
+  await sleep(5);
+  const s = el.selectionStart;
+  el.value = el.value.slice(0, s) + '8 999 123-45-67' + el.value.slice(s);
+  el.setSelectionRange(s + 15, s + 15);
+  el.dispatchEvent(new window.Event('input', { bubbles: true }));
+  await nextTick();
+  assert.equal(el.value, '+7 (999) 123-45-67');
+  app.unmount();
+
+  const second = mountInput(ref(''), { mask: masks.phoneAuto({ defaultCountry: 'ru' }), placeholder: '_' });
+  second.el.focus();
+  await sleep(5);
+  type(second.el, '800');
+  await nextTick();
+  assert.equal(second.el.value, '+7 (800) ___-__-__');
+  second.app.unmount();
+});
+
 test('шаблон + raw: в модели только цифры', async () => {
   const model = ref('');
   const { el, app } = mountInput(model, { mask: masks.date(), placeholder: '_' }, { raw: true });

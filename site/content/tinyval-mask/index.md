@@ -1,7 +1,7 @@
 ::: ru
 Маски ввода без зависимостей: телефоны, банковские карты, даты, суммы, документы РФ и свои шаблоны.
 
-- ~1 kB gzip для своего шаблона, ~2.3 kB с телефоном и привязкой к полю
+- ~1 kB gzip для своего шаблона, ~2.4 kB с телефоном и привязкой к полю
 - Курсор не прыгает, Backspace проходит через скобки и дефисы, вставка из буфера в любом формате
 - Чистые функции `mask` / `unmask` работают и на сервере — например, чтобы привести телефоны к одному виду
 - Директива `v-mask` для Vue: в `v-model` — значение с маской или без (`.raw`), видимый шаблон `+7 (___) ___-__-__`
@@ -11,7 +11,7 @@
 ::: en
 Zero-dependency input masks: phones, bank cards, dates, amounts, documents and custom patterns.
 
-- ~1 kB gzip for a custom pattern, ~2.3 kB with a phone mask and field binding
+- ~1 kB gzip for a custom pattern, ~2.4 kB with a phone mask and field binding
 - The caret doesn't jump, Backspace goes through brackets and dashes, pasting works in any format
 - Pure `mask` / `unmask` functions work on the server too — e.g. to normalize phone numbers
 - A `v-mask` directive for Vue: `v-model` gets the masked or unmasked (`.raw`) value, visible template `+7 (___) ___-__-__`
