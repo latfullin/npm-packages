@@ -252,6 +252,22 @@ test('шаблон: виден при фокусе, курсор на перво
   app.unmount();
 });
 
+test('шаблон: выделение сразу после фокуса сохраняется — вставка заменяет значение', async () => {
+  const model = ref('');
+  const { el, app } = mountInput(model, { mask: masks.phone(), placeholder: '_' });
+  el.focus();
+  el.setSelectionRange(0, el.value.length);
+  await sleep(5);
+  assert.equal(el.selectionStart, 0);
+  assert.equal(el.selectionEnd, el.value.length);
+  el.value = '89991234567';
+  el.setSelectionRange(11, 11);
+  el.dispatchEvent(new window.Event('input', { bubbles: true }));
+  await nextTick();
+  assert.equal(el.value, '+7 (999) 123-45-67');
+  app.unmount();
+});
+
 test('шаблон + raw: в модели только цифры', async () => {
   const model = ref('');
   const { el, app } = mountInput(model, { mask: masks.date(), placeholder: '_' }, { raw: true });

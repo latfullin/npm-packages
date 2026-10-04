@@ -122,8 +122,9 @@ export function attach(input: HTMLInputElement, maskInput: MaskInput, options: A
   const onFocus = () => {
     if (!opts.placeholder) return;
     apply(input.value, last.raw.length);
-    // браузер ставит курсор по месту клика уже после focus
-    setTimeout(() => focused() && apply(input.value, last.raw.length), 0);
+    // браузер ставит курсор по месту клика уже после focus. Выделение (Tab, «выделить всё» перед вставкой) не трогаем —
+    // иначе вставка попадёт после шаблона, а не заменит значение
+    setTimeout(() => focused() && input.selectionStart === input.selectionEnd && apply(input.value, last.raw.length), 0);
   };
   const onBlur = () => {
     if (opts.placeholder) apply(input.value, null);
