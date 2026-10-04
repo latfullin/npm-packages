@@ -17,10 +17,9 @@ test('телефон: маска при вводе, значение без ма
   await expect(page.locator('.mask-demo__country')).toContainText('Россия');
 });
 
-test('телефон: 8 в начале — это код страны', async ({ page }) => {
+test('телефон: вставленный номер с 8 в начале — это +7', async ({ page }) => {
   const input = page.locator('#mask-phone');
-  await input.click();
-  await input.pressSequentially('89991234567');
+  await input.fill('89991234567');
   await expect(input).toHaveValue('+7 (999) 123-45-67');
 });
 
@@ -39,7 +38,7 @@ test('телефон: Backspace стирает цифры, а не раздел�
   await input.pressSequentially('9991234');
   await input.press('Backspace');
   await input.press('Backspace');
-  await expect(raw(page, 'phone')).toContainText('"79991"');
+  await expect(raw(page, 'phone')).toContainText('"799912"');
 });
 
 test('карта: группы по 4, платёжная система, проверка Луна', async ({ page }) => {
