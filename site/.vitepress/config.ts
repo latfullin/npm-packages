@@ -58,6 +58,8 @@ const contentReload = (): Plugin => ({
 
 export default defineConfig({
   title: 'kilkenny packages',
+  // адрес сайта на хостинге: SITE_BASE=/npm-packages/ для GitHub Pages проекта
+  base: process.env.SITE_BASE ?? '/',
   cleanUrls: true,
   srcExclude: ['content/**', 'README.md'],
   locales,

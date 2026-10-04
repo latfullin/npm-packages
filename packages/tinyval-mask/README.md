@@ -1,6 +1,6 @@
 # tinyval-mask
 
-Tiny zero-dependency input masks: phones, bank cards, dates, amounts, documents and custom patterns. ~1 kB gzip for a custom pattern, ~2 kB with a phone mask and an input binding.
+Tiny zero-dependency input masks: phones, bank cards, dates, amounts, documents and custom patterns. ~1 kB gzip for a custom pattern, ~2.3 kB with a phone mask and an input binding.
 
 - The caret doesn't jump, Backspace goes through brackets and dashes, paste works in any format
 - Pure `mask` / `unmask` work on the server too (normalize phone numbers)
