@@ -80,19 +80,21 @@ npm pack --dry-run -w tinyval
 
 ## Публикация на npm
 
-Один раз:
+Пакеты публикует GitHub Actions ([publish.yml](.github/workflows/publish.yml)): уходят те пакеты, чьей версии ещё нет на npm, в порядке зависимостей (`tinyval` → `tinyval-mask` → `tinyval-vue` → `tinyval-phone`).
 
-```bash
-npm login
-```
+Один раз: на npmjs.com → Access Tokens создать Granular-токен с правом Read and write на пакеты и обходом 2FA, затем добавить его в GitHub → Settings → Secrets and variables → Actions как `NPM_TOKEN`.
 
 Выпуск новой версии:
 
 ```bash
-npm version patch -w tinyval   # 0.1.0 → 0.1.1
-npm publish -w tinyval
+npm version patch -w tinyval --no-git-tag-version   # 0.1.0 → 0.1.1, плюс запись в CHANGELOG.md
+git commit -am "tinyval 0.1.1" && git push
+git tag v0.1.1 && git push origin v0.1.1             # тег запускает публикацию
 ```
 
+- Проверить без публикации — Actions → Publish → Run workflow (по умолчанию включён dry run) или локально `node scripts/publish.mjs --dry-run`.
+- Версия с суффиксом (`0.2.0-beta.1`) публикуется под тегом `next` и не ставится через `npm install tinyval` по умолчанию.
+- Вручную, без Actions: `npm login`, затем `npm publish -w tinyval`.
 - `-w tinyval` — выполнить команду в конкретном пакете.
 - Перед публикацией автоматически запускаются сборка и тесты (`prepublishOnly`). Если тесты упали — публикации не будет.
 - На npm уходит только то, что указано в поле `"files"` пакета (у `tinyval` — `dist`).
