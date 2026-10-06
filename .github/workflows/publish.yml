@@ -1,0 +1,42 @@
+# Публикация на npm: пакеты, чьей версии ещё нет в реестре (scripts/publish.mjs).
+# Запуск — тег v* (git tag v0.1.1 && git push origin v0.1.1) или вручную во вкладке Actions (по умолчанию dry run).
+# Нужен секрет NPM_TOKEN: npmjs.com → Access Tokens → Granular, Read and write на пакеты, с обходом 2FA.
+# Provenance включается сам, когда репозиторий станет публичным (для приватных npm его не принимает).
+name: Publish
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: Только проверить, без публикации
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: npm publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          registry-url: https://registry.npmjs.org
+      - run: npm ci
+      - run: npm run build -w packages
+      # тесты каждого пакета запускает prepublishOnly перед публикацией
+      - run: node scripts/publish.mjs ${{ inputs.dry-run && '--dry-run' || '' }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: ${{ !github.event.repository.private }}
