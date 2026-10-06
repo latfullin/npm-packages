@@ -1,6 +1,6 @@
 # tinyval-mask
 
-Tiny zero-dependency input masks: phones, bank cards, dates, amounts, documents and custom patterns. ~1 kB gzip for a custom pattern, ~2.4 kB with a phone mask and an input binding.
+Tiny zero-dependency input masks: phones, bank cards, dates, amounts, documents and custom patterns. ~1 kB gzip for a custom pattern, ~2.6 kB with a phone mask and an input binding.
 
 - The caret doesn't jump, Backspace goes through brackets and dashes, paste works in any format
 - Pure `mask` / `unmask` work on the server too (normalize phone numbers)
@@ -28,7 +28,7 @@ isComplete('+7 (999) 123', phone());   // false
 isValid('31.02.2026', date());         // false — filled, but no such date (also: card Luhn, INN, SNILS, OGRN, card expiry)
 
 attach(document.querySelector('#phone'), phone(), {
-  placeholder: '_',  // show +7 (___) ___-__-__
+  placeholder: '_',  // show +7 (___) ___-__-__; any char: '0' → +7 (000) 000-00-00
   raw: true,         // input handlers get 79991234567
   onChange: ({ value, raw, complete, valid }) => {},
 });
@@ -44,7 +44,10 @@ mask('+375291234567', tel);          // '+375 (29) 123-45-67'
 tel.country('+375 29');              // { code: 'by', dial: '375', flag: '🇧🇾' }
 countryName('by', 'en');             // 'Belarus' (via Intl, no data in the bundle)
 phoneCountries();                    // 28 countries for your own picker
+mask('07400123456', phoneAuto({ defaultCountry: 'gb' })); // '+44 7400 123456' — the national prefix 0 / 8 is dropped
 ```
+
+All 245 countries of the world and SVG flag icons — the [tinyval-phone](https://www.npmjs.com/package/tinyval-phone) package with the same API. Your own countries or formats: `phoneAutoFrom({ ...phoneTable, jp: ['81', '99-9999-9999', '0'] })`.
 
 ## Patterns
 
@@ -65,7 +68,7 @@ numberMask({ thousands: ',', decimal: '.', precision: 2, negative: true, prefix:
 
 ## Ready-made masks
 
-`phone(country)` (28 countries), `phoneAuto(options)`, `detectCountry`, `flag`, `countryName`, `phoneCountries`, `card()`, `cardBrand(number)`, `cardExpiry()`, `cvc()`, `date(format)`, `time(seconds)`, `datetime()`, `inn()`, `snils()`, `passport()`, `ogrn()`, `bik()`, `kpp()`, `account()`, `postcode()`, `carPlate()`, `mac()`, `hexColor()`, `money(options)`, `percent(options)`.
+`phone(country)` (28 countries), `phoneAuto(options)`, `detectCountry`, `flag`, `countryName`, `phoneCountries`, `phoneTable`, `phoneFrom` / `phoneAutoFrom` / `detectCountryFrom` / `phoneCountriesFrom` (your own country table), `card()`, `cardBrand(number)`, `cardExpiry()`, `cvc()`, `date(format)`, `time(seconds)`, `datetime()`, `inn()`, `snils()`, `passport()`, `ogrn()`, `bik()`, `kpp()`, `account()`, `postcode()`, `carPlate()`, `mac()`, `hexColor()`, `money(options)`, `percent(options)`.
 
 Import from `tinyval-mask/presets` for the smallest bundle, or use the `masks` namespace from `tinyval-mask`.
 
