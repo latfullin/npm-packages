@@ -38,7 +38,7 @@ interface AttachedMask {
 | --- | --- |
 | `onChange` | Вызывается при изменении: `{ value, raw, complete, valid }`. Перерисовка без изменений его не вызывает |
 | `raw` (опция) | Обработчики ввода (`@input`, `v-model`) получают значение без маски, в поле при этом видна маска |
-| `placeholder` | Символ для пустых позиций: `'_'` → `+7 (___) ___-__-__`. Шаблон виден при фокусе и пока поле заполнено не до конца |
+| `placeholder` | Символ для пустых позиций: `'_'` → `+7 (___) ___-__-__`, `'0'` → `+7 (000) 000-00-00`, `'•'`, `'X'` — любой символ, в том числе цифра. Шаблон виден при фокусе и пока поле заполнено не до конца |
 | `raw`, `complete`, `valid` | Текущее значение без маски, заполненность и правильность ([`isValid`](~/api/mask)) |
 | `update(mask, options?)` | Сменить маску или опции (например, при выборе другой страны) |
 | `refresh()` | Переформатировать значение, записанное в поле из кода, — курсор останется на месте |
@@ -50,7 +50,7 @@ interface AttachedMask {
 | --- | --- |
 | `onChange` | Called on change: `{ value, raw, complete, valid }`. A re-render without changes doesn't call it |
 | `raw` (option) | Input handlers (`@input`, `v-model`) get the unmasked value while the field shows the mask |
-| `placeholder` | A character for empty positions: `'_'` → `+7 (___) ___-__-__`. The template is visible on focus and while the field isn't complete |
+| `placeholder` | A character for empty positions: `'_'` → `+7 (___) ___-__-__`, `'0'` → `+7 (000) 000-00-00`, `'•'`, `'X'` — any character, digits included. The template is visible on focus and while the field isn't complete |
 | `raw`, `complete`, `valid` | The current unmasked value, whether it is filled and correct ([`isValid`](~/api/mask)) |
 | `update(mask, options?)` | Change the mask or options (e.g. when another country is selected) |
 | `refresh()` | Reformat a value written into the field from code — the caret stays in place |
@@ -62,7 +62,7 @@ interface AttachedMask {
 | --- | --- |
 | `onChange` | 变化时调用：`{ value, raw, complete, valid }`。没有变化的重新渲染不会调用它 |
 | `raw`（选项） | 输入处理函数（`@input`、`v-model`）得到去掉掩码的值，输入框中仍显示掩码 |
-| `placeholder` | 空位使用的字符：`'_'` → `+7 (___) ___-__-__`。获得焦点时以及未填写完整时显示模板 |
+| `placeholder` | 空位使用的字符：`'_'` → `+7 (___) ___-__-__`，`'0'` → `+7 (000) 000-00-00`，`'•'`、`'X'` —— 任意字符，包括数字。获得焦点时以及未填写完整时显示模板 |
 | `raw`、`complete`、`valid` | 当前去掉掩码后的值、是否填写完整以及是否正确（[`isValid`](~/api/mask)） |
 | `update(mask, options?)` | 更换掩码或选项（例如选择了其他国家） |
 | `refresh()` | 重新格式化在代码中写入输入框的值 —— 光标保持不变 |
