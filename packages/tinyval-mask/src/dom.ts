@@ -14,7 +14,8 @@ export interface AttachOptions {
   onChange?: (state: MaskState) => void;
   // Обработчики ввода (v-model, @input) получают значение без маски: 79991234567. В поле при этом видна маска
   raw?: boolean;
-  // Символ для пустых позиций: '_' → +7 (999) ___-__-__. Шаблон виден при фокусе и пока поле заполнено не до конца
+  // Символ для пустых позиций: '_' → +7 (999) ___-__-__, '0' → +7 (999) 000-00-00 — любой, в том числе цифра.
+  // Шаблон виден при фокусе и пока поле заполнено не до конца
   placeholder?: string;
 }
 
@@ -38,6 +39,8 @@ export function attach(input: HTMLInputElement, maskInput: MaskInput, options: A
   let restore: { value: string; start: number | null; end: number | null } | null = null;
   // onChange — только при реальном изменении: перерисовка фреймворком не должна вызывать его снова
   let reported: string | undefined;
+  // что маска показала в поле в последний раз — вместе с хвостом шаблона
+  let shown = '';
 
   const focused = () => input.ownerDocument.activeElement === input;
   const rawLength = (s: string) => m.process(s).raw.length;
@@ -63,7 +66,7 @@ export function attach(input: HTMLInputElement, maskInput: MaskInput, options: A
 
   function apply(value: string, caret: number | null): MaskResult {
     const r = (last = m.process(value));
-    const shown = display(r);
+    shown = display(r);
     if (input.value !== shown) input.value = shown;
     if (caret !== null) caretRaw = Math.min(caret, r.slots.length);
     if (caret !== null && focused()) {
@@ -81,10 +84,33 @@ export function attach(input: HTMLInputElement, maskInput: MaskInput, options: A
 
   const notify = () => input.dispatchEvent(new Event('input', { bubbles: true }));
 
+  // Значение поля без хвоста шаблона: заполнитель может быть цифрой (+7 (000) 000-00-00) — его нельзя принять за ввод.
+  // Хвост — общий конец того, что было показано, и того, что в поле сейчас
+  const strip = (v: string) => {
+    if (!shown.startsWith(last.value)) return v;
+    const tail = shown.length - last.value.length;
+    let q = 0;
+    while (q < tail && q < v.length && shown[shown.length - 1 - q] === v[v.length - 1 - q]) q++;
+    return v.slice(0, v.length - q);
+  };
+  const current = () => (input.value === shown ? last.value : input.value);
+
   // capture — раньше обработчиков фреймворка: они читают уже обработанное значение
   const onInput = () => {
-    const c = input.selectionStart ?? input.value.length;
-    const r = apply(input.value, rawLength(input.value.slice(0, c)));
+    let v = input.value;
+    let c = input.selectionStart ?? v.length;
+    // вставка в пустое поле — вставленный текст и есть значение: 8 999 … в шаблон +7 (___) … даёт +7 (999) …, а не +7 (899) …
+    if (!last.raw) {
+      const prev = display(last);
+      let p = 0;
+      while (p < prev.length && p < v.length && prev[p] === v[p]) p++;
+      let q = 0;
+      while (q < prev.length - p && q < v.length - p && prev[prev.length - 1 - q] === v[v.length - 1 - q]) q++;
+      const chunk = v.slice(p, v.length - q);
+      if (chunk.length > 1) c = (v = chunk).length;
+    }
+    if (v === input.value) v = strip(v);
+    const r = apply(v, rawLength(v.slice(0, Math.min(c, v.length))));
     const value = model(r);
     if (value !== input.value) {
       // на время обработчиков в поле — значение для данных (без маски или без шаблона)
@@ -108,12 +134,15 @@ export function attach(input: HTMLInputElement, maskInput: MaskInput, options: A
     if (!back && type !== 'deleteContentForward') return;
     const s = input.selectionStart;
     if (s === null || s !== input.selectionEnd) return;
-    const slots = m.process(input.value).slots;
+    const base = current();
+    const slots = m.process(base).slots;
     if (back ? s === 0 || slots.includes(s - 1) : slots.includes(s)) return;
-    const j = back ? [...slots].reverse().find((x) => x < s) : slots.find((x) => x > s);
-    if (j === undefined) return;
+    let j = back ? [...slots].reverse().find((x) => x < s) : slots.find((x) => x > s);
+    // перед курсором нет введённых символов, только код страны (+1 (___) — его выбрала маска по вводу): стирается его цифра
+    if (j === undefined && back) j = base.slice(0, s).search(/\d(?=\D*$)/);
+    if (j === undefined || j < 0) return;
     e.preventDefault();
-    const v = input.value.slice(0, j) + input.value.slice(j + 1);
+    const v = base.slice(0, j) + base.slice(j + 1);
     apply(v, rawLength(v.slice(0, back ? j : s)));
     notify();
   };
@@ -121,12 +150,13 @@ export function attach(input: HTMLInputElement, maskInput: MaskInput, options: A
   // с шаблоном: при фокусе показать его и поставить курсор после введённого, при уходе — убрать у пустого поля
   const onFocus = () => {
     if (!opts.placeholder) return;
-    apply(input.value, last.raw.length);
-    // браузер ставит курсор по месту клика уже после focus
-    setTimeout(() => focused() && apply(input.value, last.raw.length), 0);
+    apply(current(), last.raw.length);
+    // браузер ставит курсор по месту клика уже после focus. Выделение (Tab, «выделить всё» перед вставкой) не трогаем —
+    // иначе вставка попадёт после шаблона, а не заменит значение
+    setTimeout(() => focused() && input.selectionStart === input.selectionEnd && apply(current(), last.raw.length), 0);
   };
   const onBlur = () => {
-    if (opts.placeholder) apply(input.value, null);
+    if (opts.placeholder) apply(current(), null);
   };
   // клик по пустой части шаблона — курсор на первую пустую позицию
   const onClick = () => {
@@ -156,7 +186,7 @@ export function attach(input: HTMLInputElement, maskInput: MaskInput, options: A
     update(next, nextOptions) {
       m = toMask(next);
       if (nextOptions) opts = nextOptions;
-      apply(input.value, focused() ? caretRaw : null);
+      apply(current(), focused() ? caretRaw : null);
     },
     refresh() {
       // фреймворк записал в поле то же, что мы отдали модели, — ничего не изменилось, возвращаем показ как был.

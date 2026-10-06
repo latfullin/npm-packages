@@ -1,7 +1,7 @@
 ::: ru
 Маски ввода без зависимостей: телефоны, банковские карты, даты, суммы, документы РФ и свои шаблоны.
 
-- ~1 kB gzip для своего шаблона, ~2 kB с телефоном и привязкой к полю
+- ~1 kB gzip для своего шаблона, ~2.6 kB с телефоном и привязкой к полю
 - Курсор не прыгает, Backspace проходит через скобки и дефисы, вставка из буфера в любом формате
 - Чистые функции `mask` / `unmask` работают и на сервере — например, чтобы привести телефоны к одному виду
 - Директива `v-mask` для Vue: в `v-model` — значение с маской или без (`.raw`), видимый шаблон `+7 (___) ___-__-__`
@@ -11,7 +11,7 @@
 ::: en
 Zero-dependency input masks: phones, bank cards, dates, amounts, documents and custom patterns.
 
-- ~1 kB gzip for a custom pattern, ~2 kB with a phone mask and field binding
+- ~1 kB gzip for a custom pattern, ~2.6 kB with a phone mask and field binding
 - The caret doesn't jump, Backspace goes through brackets and dashes, pasting works in any format
 - Pure `mask` / `unmask` functions work on the server too — e.g. to normalize phone numbers
 - A `v-mask` directive for Vue: `v-model` gets the masked or unmasked (`.raw`) value, visible template `+7 (___) ___-__-__`
@@ -21,7 +21,7 @@ Zero-dependency input masks: phones, bank cards, dates, amounts, documents and c
 ::: zh
 零依赖的输入掩码：电话、银行卡、日期、金额、证件以及自定义模板。
 
-- 自定义模板约 1 kB gzip，包含电话掩码和输入框绑定约 2 kB
+- 自定义模板约 1 kB gzip，包含电话掩码和输入框绑定约 2.6 kB
 - 光标不会跳动，Backspace 可以越过括号和短横线，可粘贴任意格式的内容
 - 纯函数 `mask` / `unmask` 也可以在服务端使用 —— 例如统一电话号码格式
 - 用于 Vue 的 `v-mask` 指令：`v-model` 可得到带掩码或去掉掩码（`.raw`）的值，可见模板 `+7 (___) ___-__-__`

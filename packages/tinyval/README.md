@@ -31,7 +31,7 @@ const result = validate(User, input);
 if (result.valid) {
   result.data; // cleaned, typed data (unknown keys removed)
 } else {
-  result.errors; // { name: 'Must be at least 2 long', 'address.city': 'Required' }
+  result.errors; // { name: 'Must be at least 2 characters long', 'address.city': 'Required' }
   result.issues; // [{ code, message, path: ['address', 'city'] }]
 }
 ```
@@ -124,7 +124,7 @@ Every issue has `code`, `message`, `path` and `params` (`{ min: 8 }`) — so the
 
 ## Laravel-style errors
 
-`flatten(issues)` returns every message by field: `{ password: ['Must be at least 8 long', 'Invalid format'] }`.
+`flatten(issues)` returns every message by field: `{ password: ['Must be at least 8 characters long', 'Invalid format'] }`.
 
 ```ts
 const result = validate(User, body, { all: true });

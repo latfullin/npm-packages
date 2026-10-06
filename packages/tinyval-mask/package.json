@@ -2,6 +2,17 @@
   "name": "tinyval-mask",
   "version": "0.1.0",
   "description": "Tiny zero-dependency input masks: phones, cards, dates, numbers, documents, custom patterns",
+  "author": "kilkenny",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/latfullin/npm-packages.git",
+    "directory": "packages/tinyval-mask"
+  },
+  "homepage": "https://github.com/latfullin/npm-packages/tree/main/packages/tinyval-mask#readme",
+  "bugs": {
+    "url": "https://github.com/latfullin/npm-packages/issues"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -21,7 +32,8 @@
     "./package.json": "./package.json"
   },
   "files": [
-    "dist"
+    "dist",
+    "CHANGELOG.md"
   ],
   "sideEffects": false,
   "engines": {
@@ -48,8 +60,6 @@
     "number format",
     "zero-dependency"
   ],
-  "author": "kilkenny",
-  "license": "MIT",
   "devDependencies": {
     "happy-dom": "^20.14.5",
     "typescript": "^7.0.2",

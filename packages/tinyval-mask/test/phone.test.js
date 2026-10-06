@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mask, unmask, isComplete } from '../dist/index.js';
-import { phone, phoneAuto, phoneCountries, detectCountry, flag, countryName } from '../dist/presets.js';
+import { phone, phoneAuto, phoneCountries, detectCountry, flag, countryName, phoneTable, phoneAutoFrom, detectCountryFrom } from '../dist/presets.js';
 
 test('detectCountry: самый длинный подходящий код, +7 — Россия или Казахстан', () => {
   assert.equal(detectCountry('375291234567'), 'by');
@@ -76,4 +76,27 @@ test('шаблон в автомаске — под определённую с�
   const m = phoneAuto();
   assert.equal(m.template('+375', '_'), '+375 (__) ___-__-__');
   assert.equal(m.template('+7', '_'), '+7 (___) ___-__-__');
+});
+
+test('национальная приставка: 0 / 8 в начале местного номера отбрасывается', () => {
+  assert.equal(mask('07400123456', phoneAuto({ defaultCountry: 'gb' })), '+44 7400 123456');
+  assert.equal(mask('80291234567', phoneAuto({ defaultCountry: 'by' })), '+375 (29) 123-45-67');
+  assert.equal(mask('0291234567', phone('by')), '+375 (29) 123-45-67');
+  assert.equal(mask('015123456789', phone('de')), '+49 151 23456789');
+  assert.equal(mask('12015550123', phoneAuto({ defaultCountry: 'us' })), '+1 (201) 555-0123');
+  assert.equal(mask('2015550123', phoneAuto({ defaultCountry: 'us' })), '+1 (201) 555-0123');
+});
+
+test('своя таблица стран: phoneAutoFrom и признак страны с общим кодом', () => {
+  const table = {
+    ...phoneTable,
+    bs: ['1', '(999) 999-9999', '1', '242'],
+    jp: ['81', '99-9999-9999', '0'],
+  };
+  assert.equal(detectCountryFrom(table, '12423591234'), 'bs');
+  assert.equal(detectCountryFrom(table, '12015550123'), 'us');
+  const m = phoneAutoFrom(table, { defaultCountry: 'jp' });
+  assert.equal(mask('09012345678', m), '+81 90-1234-5678');
+  assert.equal(m.country('+1 242 359').code, 'bs');
+  assert.equal(m.country('').code, 'jp');
 });

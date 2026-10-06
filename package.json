@@ -9,10 +9,16 @@
   "scripts": {
     "dev": "tsc -b && concurrently -k -n pkg,site -c blue,green \"tsc -b -w --preserveWatchOutput\" \"npm run dev -w site\"",
     "build": "npm run build -w packages && npm run build -w site",
-    "test": "npm test -w packages"
+    "test": "npm test -w packages",
+    "size": "node scripts/size.mjs",
+    "attw": "for p in packages/*/; do attw --pack \"$p\" --profile esm-only --quiet || exit 1; done",
+    "e2e": "playwright test"
   },
   "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.5",
+    "@playwright/test": "^1.63.0",
     "concurrently": "^10.0.5",
+    "esbuild": "^0.28.2",
     "typescript": "^7.0.2"
   }
 }

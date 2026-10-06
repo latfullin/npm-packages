@@ -252,6 +252,115 @@ test('шаблон: виден при фокусе, курсор на перво
   app.unmount();
 });
 
+test('шаблон: выделение сразу после фокуса сохраняется — вставка заменяет значение', async () => {
+  const model = ref('');
+  const { el, app } = mountInput(model, { mask: masks.phone(), placeholder: '_' });
+  el.focus();
+  el.setSelectionRange(0, el.value.length);
+  await sleep(5);
+  assert.equal(el.selectionStart, 0);
+  assert.equal(el.selectionEnd, el.value.length);
+  el.value = '89991234567';
+  el.setSelectionRange(11, 11);
+  el.dispatchEvent(new window.Event('input', { bubbles: true }));
+  await nextTick();
+  assert.equal(el.value, '+7 (999) 123-45-67');
+  app.unmount();
+});
+
+test('шаблон: вставка номера с 8 в пустое поле — это +7, ввод 8 по одной цифре — часть номера', async () => {
+  const model = ref('');
+  const { el, app } = mountInput(model, { mask: masks.phoneAuto({ defaultCountry: 'ru' }), placeholder: '_' });
+  el.focus();
+  await sleep(5);
+  const s = el.selectionStart;
+  el.value = el.value.slice(0, s) + '8 999 123-45-67' + el.value.slice(s);
+  el.setSelectionRange(s + 15, s + 15);
+  el.dispatchEvent(new window.Event('input', { bubbles: true }));
+  await nextTick();
+  assert.equal(el.value, '+7 (999) 123-45-67');
+  app.unmount();
+
+  const second = mountInput(ref(''), { mask: masks.phoneAuto({ defaultCountry: 'ru' }), placeholder: '_' });
+  second.el.focus();
+  await sleep(5);
+  type(second.el, '800');
+  await nextTick();
+  assert.equal(second.el.value, '+7 (800) ___-__-__');
+  second.app.unmount();
+});
+
+test('шаблон: код страны, выбранный по вводу, стирается Backspace', async () => {
+  const model = ref('');
+  const { el, app } = mountInput(model, { mask: masks.phoneAuto(), placeholder: '_' });
+  el.focus();
+  await sleep(5);
+  type(el, '1');
+  await nextTick();
+  assert.equal(el.value, '+1 (___) ___-____');
+  backspace(el);
+  await nextTick();
+  assert.equal(el.value.replace(/[_ ]/g, ''), '+', 'остался только +');
+  type(el, '44');
+  await nextTick();
+  assert.equal(el.value, '+44 ____ ______');
+  backspace(el);
+  backspace(el);
+  await nextTick();
+  assert.equal(el.value.replace(/[_ ]/g, ''), '+');
+  app.unmount();
+
+  // у маски одной страны код — часть шаблона: стереть его нельзя, поле остаётся пустым
+  const single = mountInput(ref(''), { mask: masks.phone('ru'), placeholder: '_' });
+  single.el.focus();
+  await sleep(5);
+  backspace(single.el);
+  await nextTick();
+  assert.equal(single.el.value, '+7 (___) ___-__-__');
+  single.app.unmount();
+});
+
+test('шаблон: заполнитель-цифра не считается вводом', async () => {
+  const model = ref('');
+  const { el, app } = mountInput(model, { mask: masks.phone('ru'), placeholder: '0' }, { raw: true });
+  el.focus();
+  await sleep(5);
+  assert.equal(el.value, '+7 (000) 000-00-00');
+  type(el, '999');
+  await nextTick();
+  assert.equal(el.value, '+7 (999) 000-00-00');
+  assert.equal(model.value, '7999');
+  backspace(el);
+  await nextTick();
+  assert.equal(model.value, '799');
+  type(el, '91234567');
+  await nextTick();
+  assert.equal(el.value, '+7 (999) 123-45-67');
+  assert.equal(model.value, '79991234567');
+  el.blur();
+  el.focus();
+  await sleep(5);
+  assert.equal(model.value, '79991234567', 'фокус и уход не меняют значение');
+  app.unmount();
+
+  const auto = mountInput(ref(''), { mask: masks.phoneAuto(), placeholder: '9' });
+  auto.el.focus();
+  await sleep(5);
+  assert.equal(auto.el.value, '+999 999 999 999 999');
+  type(auto.el, '+49');
+  await nextTick();
+  assert.equal(auto.el.value, '+49 999 9999999');
+  type(auto.el, '15');
+  await nextTick();
+  assert.equal(auto.el.value, '+49 159 9999999');
+  backspace(auto.el);
+  backspace(auto.el);
+  backspace(auto.el);
+  await nextTick();
+  assert.equal(auto.el.value, '+499 999 999 999 999', 'код страны стёрт: снова общий шаблон');
+  auto.app.unmount();
+});
+
 test('шаблон + raw: в модели только цифры', async () => {
   const model = ref('');
   const { el, app } = mountInput(model, { mask: masks.date(), placeholder: '_' }, { raw: true });

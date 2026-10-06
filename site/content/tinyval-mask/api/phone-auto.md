@@ -57,7 +57,8 @@ interface CountryInfo {
 - Чтобы ввести номер другой страны, когда поле уже показывает страну по умолчанию, достаточно набрать `+` — ввод начнётся заново.
 - Значение без маски — все цифры с кодом страны: `375291234567`.
 - `valid` и [`isValid`](~/api/mask) — `true`, только если номер заполнен по маске определённой страны.
-- Список стран — в [Готовых масках](~/api/presets#телефоны).
+- Национальная приставка отбрасывается: с `defaultCountry: 'gb'` номер `07400 123456` станет `+44 7400 123456`, с `'ru'` — `8 999…` станет `+7 (999)…`.
+- Список стран — в [Готовых масках](~/api/presets#телефоны). Все 245 стран мира — пакет [tinyval-phone](@/tinyval-phone/) с тем же API.
 :::
 
 ::: en
@@ -66,7 +67,8 @@ interface CountryInfo {
 - To type a number of another country when the field already shows the default country, just type `+` — input starts over.
 - The unmasked value is all digits including the country code: `375291234567`.
 - `valid` and [`isValid`](~/api/mask) are `true` only if the number is filled by the mask of a detected country.
-- The country list is in [Ready-made masks](~/api/presets#phones).
+- The national prefix is dropped: with `defaultCountry: 'gb'` the number `07400 123456` becomes `+44 7400 123456`, with `'ru'` — `8 999…` becomes `+7 (999)…`.
+- The country list is in [Ready-made masks](~/api/presets#phones). All 245 countries of the world — the [tinyval-phone](@/tinyval-phone/) package with the same API.
 :::
 
 ::: zh
@@ -75,7 +77,8 @@ interface CountryInfo {
 - 当输入框已显示默认国家时，如需输入其他国家的号码，只需输入 `+` —— 输入会重新开始。
 - 去掉掩码后为包含国家代码的全部数字：`375291234567`。
 - 只有当号码按识别出的国家掩码填写完整时，`valid` 和 [`isValid`](~/api/mask) 才为 `true`。
-- 国家列表见 [预设掩码](~/api/presets)。
+- 国内长途前缀会被去掉：设置 `defaultCountry: 'gb'` 时，号码 `07400 123456` 会变成 `+44 7400 123456`；设置 `'ru'` 时，`8 999…` 会变成 `+7 (999)…`。
+- 国家列表见 [预设掩码](~/api/presets)。全球全部 245 个国家 —— 使用 API 相同的 [tinyval-phone](@/tinyval-phone/) 包。
 :::
 
 ## @t(examples)
@@ -167,23 +170,53 @@ unmask('+49 151 23456789', phoneAuto()); // '4915123456789'
 ::: ru
 ## Флаги и названия
 
-- `flag(code)` — флаг-эмодзи из кода страны. Windows вместо флагов-эмодзи показывает две буквы (`RU`) — если это важно, берите иконки флагов (например, пакет `flag-icons`) по `country.code`.
+- `flag(code)` — флаг-эмодзи из кода страны. Windows вместо флагов-эмодзи показывает две буквы (`RU`) — если это важно, берите SVG-иконки из [tinyval-phone/flags](@/tinyval-phone/guide/flags) по `country.code`.
 - `countryName(code, locale)` — название на любом языке через стандартный `Intl.DisplayNames`: таблицы названий в пакете нет, поэтому размер не растёт.
 :::
 
 ::: en
 ## Flags and names
 
-- `flag(code)` — a flag emoji from the country code. Windows shows two letters (`RU`) instead of flag emoji — if that matters, use flag icons (e.g. the `flag-icons` package) by `country.code`.
+- `flag(code)` — a flag emoji from the country code. Windows shows two letters (`RU`) instead of flag emoji — if that matters, use SVG icons from [tinyval-phone/flags](@/tinyval-phone/guide/flags) by `country.code`.
 - `countryName(code, locale)` — the name in any language via the standard `Intl.DisplayNames`: there's no table of names in the package, so the size doesn't grow.
 :::
 
 ::: zh
 ## 国旗和名称
 
-- `flag(code)` —— 根据国家代码生成国旗表情。Windows 会显示两个字母（`RU`）而不是国旗表情 —— 如果这很重要，请按 `country.code` 使用国旗图标（例如 `flag-icons` 包）。
+- `flag(code)` —— 根据国家代码生成国旗表情。Windows 会显示两个字母（`RU`）而不是国旗表情 —— 如果这很重要，请按 `country.code` 使用 [tinyval-phone/flags](@/tinyval-phone/guide/flags) 中的 SVG 图标。
 - `countryName(code, locale)` —— 通过标准的 `Intl.DisplayNames` 获取任意语言的名称：包中没有名称表，因此不会增加体积。
 :::
+
+::: ru
+## Свои страны и форматы
+
+`phoneTable` — таблица стран пакета. Функции `phoneFrom`, `phoneAutoFrom`, `detectCountryFrom`, `phoneCountriesFrom` работают так же, но с любой таблицей: можно добавить страну или поменять формат. Запись страны — `[код, шаблон после кода, национальная приставка, признак страны]`, приставка и признак — регулярные выражения по цифрам без кода страны.
+:::
+
+::: en
+## Your own countries and formats
+
+`phoneTable` is the package's country table. `phoneFrom`, `phoneAutoFrom`, `detectCountryFrom`, `phoneCountriesFrom` work the same way but with any table: add a country or change a format. A country entry is `[dial code, pattern after the code, national prefix, country sign]`; the prefix and the sign are regular expressions over the digits without the country code.
+:::
+
+::: zh
+## 自定义国家和格式
+
+`phoneTable` 是本包的国家表。`phoneFrom`、`phoneAutoFrom`、`detectCountryFrom`、`phoneCountriesFrom` 的用法相同，但适用于任何表：可以添加国家或修改格式。国家条目为 `[区号, 区号后的模板, 国内长途前缀, 国家特征]`，前缀和特征是针对不含国家代码的数字的正则表达式。
+:::
+
+```ts
+import { phoneTable, phoneAutoFrom } from 'tinyval-mask/presets';
+
+const table = {
+  ...phoneTable,
+  jp: ['81', '99-9999-9999', '0'],
+  bs: ['1', '(999) 999-9999', '1', '242'], // +1 242… — Багамы / the Bahamas
+} as const;
+const tel = phoneAutoFrom(table, { defaultCountry: 'jp' });
+mask('09012345678', tel); // '+81 90-1234-5678'
+```
 
 ## @t(see)
 
