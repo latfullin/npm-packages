@@ -2,6 +2,13 @@
   "name": "tinyval-mask",
   "version": "0.1.0",
   "description": "Tiny zero-dependency input masks: phones, cards, dates, numbers, documents, custom patterns",
+  "homepage": "https://tinyval.ru/tinyval-mask/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/latfullin/npm-packages.git",
+    "directory": "packages/tinyval-mask"
+  },
+  "bugs": "https://github.com/latfullin/npm-packages/issues",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

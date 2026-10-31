@@ -2,6 +2,13 @@
   "name": "tinyval-vue",
   "version": "0.1.0",
   "description": "Vue 3 form state for tinyval: v-model values, errors, touched, submit, server errors",
+  "homepage": "https://tinyval.ru/tinyval-vue/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/latfullin/npm-packages.git",
+    "directory": "packages/tinyval-vue"
+  },
+  "bugs": "https://github.com/latfullin/npm-packages/issues",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

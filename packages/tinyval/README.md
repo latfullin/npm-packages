@@ -7,6 +7,8 @@ Tiny, fast, zero-dependency validation for browser and server.
 - Nested objects and arrays, unions, unknown keys handling, coercion, transforms, async checks
 - [Standard Schema](https://standardschema.dev) — works with tRPC, Hono, TanStack Form, React Hook Form and more
 
+Documentation: **[tinyval.ru/tinyval](https://tinyval.ru/tinyval/)** — guide, API reference and live demo.
+
 ## Install
 
 ```bash

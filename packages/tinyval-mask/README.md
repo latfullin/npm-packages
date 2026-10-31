@@ -6,6 +6,8 @@ Tiny zero-dependency input masks: phones, bank cards, dates, amounts, documents 
 - Pure `mask` / `unmask` work on the server too (normalize phone numbers)
 - `v-mask` directive for Vue (`tinyval-mask/vue`)
 
+Documentation: **[tinyval.ru/tinyval-mask](https://tinyval.ru/tinyval-mask/)** — guide, API reference and live demo.
+
 ## Install
 
 ```bash
