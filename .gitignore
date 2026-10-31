@@ -4,3 +4,5 @@ dist
 .tsbuildinfo
 site/.vitepress/cache
 site/.vitepress/dist
+
+.env

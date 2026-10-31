@@ -2,6 +2,8 @@
 
 Vue 3 form state on [tinyval](https://www.npmjs.com/package/tinyval) schemas: values for `v-model`, errors, touched fields, submission, server errors, async checks, field arrays, multi-step forms and drafts — as composables or components. ~2 kB gzip for `useForm`, ~4 kB for everything.
 
+Documentation: **[tinyval.ru/tinyval-vue](https://tinyval.ru/tinyval-vue/)** — guide, API reference and live demo.
+
 ## Install
 
 ```bash

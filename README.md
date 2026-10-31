@@ -11,6 +11,9 @@
 npm-packages/
 ├── package.json          # npm workspaces + общие команды
 ├── tsconfig.json         # список пакетов для общей сборки (tsc -b)
+├── Dockerfile            # сборка сайта и образ с Caddy для VPS
+├── Caddyfile             # домены, HTTPS, кэш и 404 на сервере
+├── docker-compose.yml    # запуск на VPS: порты, тома с сертификатами
 ├── packages/
 │   ├── tinyval-mask/     # маски ввода, без зависимостей
 │   ├── tinyval-vue/      # формы во Vue на tinyval (зависит от tinyval)
@@ -119,10 +122,53 @@ git tag tinyval@0.1.1
 git push --follow-tags
 ```
 
+## Деплой сайта на VPS
+
+Сайт собирается в статику и отдаётся через [Caddy](https://caddyserver.com) — он сам получает и продлевает сертификат Let's Encrypt. Нужен только Docker.
+
+Файлы: `Dockerfile` (сборка пакетов и сайта → образ с Caddy), `Caddyfile` (домены, кэш, 404), `docker-compose.yml`, `.env.example`.
+
+### Первый запуск
+
+На VPS должна быть A-запись домена на его IP и свободные порты 80 и 443.
+
+```bash
+git clone git@github.com:latfullin/npm-packages.git
+cd npm-packages
+cp .env.example .env     # вписать свои домены в SITE_ADDRESS
+docker compose up -d --build
+```
+
+Через несколько секунд сертификат выпустится сам, сайт будет на https://tinyval.ru.
+
+### Обновить сайт
+
+```bash
+git pull
+docker compose up -d --build
+```
+
+Старый контейнер заменится новым; сертификаты лежат в томе `caddy_data` и переживают пересборку.
+
+### Полезное
+
+```bash
+docker compose logs -f         # логи Caddy, в том числе выпуск сертификата
+docker compose ps              # состояние, healthcheck ходит на /healthz
+docker compose down            # остановить
+docker run --rm -p 8080:80 -e SITE_ADDRESS=:80 tinyval-docs   # проверить образ локально по HTTP
+```
+
+### Если что-то не так
+
+- **Сертификат не выпускается** — проверьте, что домен из `SITE_ADDRESS` резолвится в IP сервера и порт 80 снаружи открыт (через него идёт проверка Let's Encrypt).
+- **Порты 80/443 заняты** — на сервере уже есть nginx. Либо выключить его, либо в `docker-compose.yml` пробросить другой порт (`'8080:80'`), в `.env` поставить `SITE_ADDRESS=:80` и проксировать на него с хоста.
+- **После деплоя видна старая страница** — HTML отдаётся с `must-revalidate`, но CDN перед сервером может кэшировать; сбросьте кэш там.
+
 ## Добавить новый пакет
 
 1. Скопировать `packages/tinyval` в `packages/<имя>`, удалить `dist` и `.tsbuildinfo`.
-2. В `packages/<имя>/package.json` поменять `name`, `version` (`0.1.0`), `description`, `keywords`.
+2. В `packages/<имя>/package.json` поменять `name`, `version` (`0.1.0`), `description`, `keywords`, `homepage` (`https://tinyval.ru/<имя>/`) и `directory` в `repository`.
 3. Добавить пакет в `references` корневого `tsconfig.json`:
    ```json
    { "path": "packages/<имя>" }

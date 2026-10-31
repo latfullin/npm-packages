@@ -2,6 +2,13 @@
   "name": "tinyval",
   "version": "0.1.0",
   "description": "Tiny, fast, zero-dependency validation",
+  "homepage": "https://tinyval.ru/tinyval/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/latfullin/npm-packages.git",
+    "directory": "packages/tinyval"
+  },
+  "bugs": "https://github.com/latfullin/npm-packages/issues",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
