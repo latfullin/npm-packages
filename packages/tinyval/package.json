@@ -1,6 +1,6 @@
 {
   "name": "tinyval",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Tiny, fast, zero-dependency validation",
   "homepage": "https://tinyval.ru/tinyval/",
   "repository": {
