@@ -191,6 +191,10 @@ cd ../proxy && ./cert.sh tinyval.ru www.tinyval.ru
 | `DEPLOY_PATH` | путь к клону на сервере, например `/srv/npm-packages` |
 | `DEPLOY_PORT` | порт SSH, если не 22 (необязательно) |
 
+Деплой выключен, пока не задана переменная `DEPLOY_ENABLED=true` (вкладка Variables):
+без неё workflow пропускается, а не падает на каждом пуше в `main`. Включать после того,
+как заданы секреты.
+
 Переменная `DEPLOY_URL` (вкладка Variables) — что проверять после деплоя, по умолчанию
 `https://tinyval.ru/`.
 
