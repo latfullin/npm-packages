@@ -209,6 +209,10 @@ const bigint = (msg?: Message) =>
   );
 ```
 
+## Docs
+
+Full documentation with live examples (ru, en, zh): [tinyval.ru/tinyval](https://tinyval.ru/tinyval/).
+
 ## License
 
 MIT

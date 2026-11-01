@@ -9,7 +9,7 @@
     "url": "git+https://github.com/latfullin/npm-packages.git",
     "directory": "packages/tinyval-mask"
   },
-  "homepage": "https://github.com/latfullin/npm-packages/tree/main/packages/tinyval-mask#readme",
+  "homepage": "https://tinyval.ru/tinyval-mask/",
   "bugs": {
     "url": "https://github.com/latfullin/npm-packages/issues"
   },

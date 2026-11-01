@@ -9,7 +9,7 @@
     "url": "git+https://github.com/latfullin/npm-packages.git",
     "directory": "packages/tinyval-phone"
   },
-  "homepage": "https://github.com/latfullin/npm-packages/tree/main/packages/tinyval-phone#readme",
+  "homepage": "https://tinyval.ru/tinyval-phone/",
   "bugs": {
     "url": "https://github.com/latfullin/npm-packages/issues"
   },

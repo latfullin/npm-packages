@@ -9,7 +9,7 @@
     "url": "git+https://github.com/latfullin/npm-packages.git",
     "directory": "packages/tinyval"
   },
-  "homepage": "https://github.com/latfullin/npm-packages/tree/main/packages/tinyval#readme",
+  "homepage": "https://tinyval.ru/tinyval/",
   "bugs": {
     "url": "https://github.com/latfullin/npm-packages/issues"
   },

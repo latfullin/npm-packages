@@ -71,7 +71,7 @@ A country entry is `[dial code, pattern after the code, national prefix, country
 
 ## Docs
 
-Full documentation with a live demo (ru, en, zh): see the `site/` folder of the repository.
+Full documentation with a live demo (ru, en, zh): [tinyval.ru/tinyval-phone](https://tinyval.ru/tinyval-phone/).
 
 ## Data
 

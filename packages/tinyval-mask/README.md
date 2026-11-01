@@ -99,6 +99,10 @@ const Contact = object({
 });
 ```
 
+## Docs
+
+Full documentation with live examples (ru, en, zh): [tinyval.ru/tinyval-mask](https://tinyval.ru/tinyval-mask/).
+
 ## License
 
 MIT

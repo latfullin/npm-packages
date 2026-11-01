@@ -9,7 +9,7 @@
     "url": "git+https://github.com/latfullin/npm-packages.git",
     "directory": "packages/tinyval-vue"
   },
-  "homepage": "https://github.com/latfullin/npm-packages/tree/main/packages/tinyval-vue#readme",
+  "homepage": "https://tinyval.ru/tinyval-vue/",
   "bugs": {
     "url": "https://github.com/latfullin/npm-packages/issues"
   },
