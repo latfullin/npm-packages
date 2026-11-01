@@ -38,6 +38,11 @@ concurrency:
 jobs:
   deploy:
     name: Сборка и перезапуск на сервере
+    # Выключатель: пока нет переменной DEPLOY_ENABLED=true, деплой пропускается и не
+    # роняет каждый пуш в main. Включить — Settings → Variables → DEPLOY_ENABLED=true,
+    # предварительно задав секреты DEPLOY_*. Секрет в условии использовать нельзя,
+    # поэтому выключателем служит именно переменная.
+    if: vars.DEPLOY_ENABLED == 'true'
     runs-on: ubuntu-latest
     environment:
       name: production
@@ -51,9 +56,10 @@ jobs:
           PATH_ON_SERVER: ${{ secrets.DEPLOY_PATH }}
         run: |
           missing=
-          for v in HOST USER KEY PATH_ON_SERVER; do
-            [ -n "${!v}" ] || missing="$missing DEPLOY_${v%_ON_SERVER}"
-          done
+          [ -n "$HOST" ] || missing="$missing DEPLOY_HOST"
+          [ -n "$USER" ] || missing="$missing DEPLOY_USER"
+          [ -n "$KEY" ] || missing="$missing DEPLOY_SSH_KEY"
+          [ -n "$PATH_ON_SERVER" ] || missing="$missing DEPLOY_PATH"
           if [ -n "$missing" ]; then
             echo "::error::Не заданы секреты:$missing — см. комментарий в .github/workflows/deploy.yml"
             exit 1
