@@ -11,9 +11,9 @@
 npm-packages/
 ├── package.json          # npm workspaces + общие команды
 ├── tsconfig.json         # список пакетов для общей сборки (tsc -b)
-├── Dockerfile            # сборка сайта и образ с Caddy для VPS
-├── Caddyfile             # домены, HTTPS, кэш и 404 на сервере
-├── docker-compose.yml    # запуск на VPS: порты, тома с сертификатами
+├── Dockerfile            # сборка сайта и образ с Caddy
+├── Caddyfile             # кэш, 404 и заголовки (домены и HTTPS — в репозитории proxy)
+├── docker-compose.yml    # запуск контейнера в общей сети web, за глобальным прокси
 ├── packages/
 │   ├── tinyval-mask/     # маски ввода, без зависимостей
 │   ├── tinyval-vue/      # формы во Vue на tinyval (зависит от tinyval)
@@ -122,24 +122,36 @@ git tag tinyval@0.1.1
 git push --follow-tags
 ```
 
-## Деплой сайта на VPS
+## Деплой сайта
 
-Сайт собирается в статику и отдаётся через [Caddy](https://caddyserver.com) — он сам получает и продлевает сертификат Let's Encrypt. Нужен только Docker.
+Сайт собирается в статику и отдаётся через [Caddy](https://caddyserver.com) по http
+внутри docker-сети. Наружу его выставляет **глобальный прокси** — отдельный репозиторий
+`proxy`, один на машину: он держит порты 80 и 443, разбирает домены и выпускает
+сертификаты Let's Encrypt. Поэтому локально и на сервере всё поднимается одинаково.
 
-Файлы: `Dockerfile` (сборка пакетов и сайта → образ с Caddy), `Caddyfile` (домены, кэш, 404), `docker-compose.yml`, `.env.example`.
+Файлы: `Dockerfile` (сборка пакетов и сайта → образ с Caddy), `Caddyfile` (кэш, 404,
+заголовки), `docker-compose.yml`, `.env.example`. Домен прописан не здесь, а в
+`proxy/nginx/conf.d/tinyval.ru.conf`.
 
 ### Первый запуск
 
-На VPS должна быть A-запись домена на его IP и свободные порты 80 и 443.
+Прокси должен быть запущен — он создаёт сеть `web`, без неё контейнер не поднимется:
 
 ```bash
+cd ../proxy && ./up.sh
+
 git clone git@github.com:latfullin/npm-packages.git
 cd npm-packages
-cp .env.example .env     # вписать свои домены в SITE_ADDRESS
 docker compose up -d --build
 ```
 
-Через несколько секунд сертификат выпустится сам, сайт будет на https://tinyval.ru.
+Локально сайт открывается на http://tinyval.ru/ (нужна строка в `hosts`, см. README
+прокси). На сервере, когда A-запись домена указывает на его IP, остаётся выпустить
+сертификат — один раз, дальше продлевается само:
+
+```bash
+cd ../proxy && ./cert.sh tinyval.ru www.tinyval.ru
+```
 
 ### Обновить сайт
 
@@ -148,21 +160,26 @@ git pull
 docker compose up -d --build
 ```
 
-Старый контейнер заменится новым; сертификаты лежат в томе `caddy_data` и переживают пересборку.
+Старый контейнер заменится новым. Сертификаты лежат в томе прокси и пересборки не касаются.
 
 ### Полезное
 
 ```bash
-docker compose logs -f         # логи Caddy, в том числе выпуск сертификата
+docker compose logs -f         # логи Caddy
 docker compose ps              # состояние, healthcheck ходит на /healthz
 docker compose down            # остановить
-docker run --rm -p 8080:80 -e SITE_ADDRESS=:80 tinyval-docs   # проверить образ локально по HTTP
+curl -H 'Host: tinyval.ru' http://localhost/        # проверить через прокси, без правки hosts
+docker run --rm -p 8080:80 -e SITE_ADDRESS=:80 tinyval-docs   # проверить образ сам по себе
 ```
 
 ### Если что-то не так
 
-- **Сертификат не выпускается** — проверьте, что домен из `SITE_ADDRESS` резолвится в IP сервера и порт 80 снаружи открыт (через него идёт проверка Let's Encrypt).
-- **Порты 80/443 заняты** — на сервере уже есть nginx. Либо выключить его, либо в `docker-compose.yml` пробросить другой порт (`'8080:80'`), в `.env` поставить `SITE_ADDRESS=:80` и проксировать на него с хоста.
+- **502 от прокси** — контейнер `tinyval-docs` не поднят или переименован: сверьте
+  `docker ps` с `set $upstream` в `proxy/nginx/conf.d/tinyval.ru.conf`.
+- **Сертификат не выпускается** — домен должен резолвиться в IP сервера, а порт 80
+  снаружи быть открыт: через него идёт проверка Let's Encrypt. Логи: `cd ../proxy && docker compose logs certbot`.
+- **Caddy полез за своим сертификатом** — в `.env` в `SITE_ADDRESS` попал домен вместо
+  `:80`. За https отвечает прокси, Caddy должен слушать только http.
 - **После деплоя видна старая страница** — HTML отдаётся с `must-revalidate`, но CDN перед сервером может кэшировать; сбросьте кэш там.
 
 ## Добавить новый пакет
