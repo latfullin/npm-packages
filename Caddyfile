@@ -1,0 +1,44 @@
+# За глобальным прокси (проект ../proxy): доверяем заголовкам X-Forwarded-* из
+# приватных подсетей Docker, иначе Caddy считает клиентом сам прокси, а схемой — http.
+{
+	servers {
+		trusted_proxies static private_ranges
+	}
+}
+
+# Адрес берётся из переменной SITE_ADDRESS (см. docker-compose.yml и .env) и равен :80 —
+# внутри сети отдаём http. Домены и сертификаты Let's Encrypt теперь на стороне прокси.
+{$SITE_ADDRESS::80}
+
+root * /srv
+encode zstd gzip
+
+# Проверка живости контейнера
+respond /healthz 200
+
+# cleanUrls в VitePress: ссылка /tinyval/api/parse -> файл /tinyval/api/parse.html
+try_files {path} {path}.html {path}/index.html
+
+# Ассеты VitePress содержат хэш в имени — можно кэшировать навсегда,
+# HTML всегда перепроверяем, иначе после деплоя останутся старые страницы.
+@immutable path /assets/*
+header @immutable Cache-Control "public, max-age=31536000, immutable"
+
+@revalidate not path /assets/*
+header @revalidate Cache-Control "public, max-age=0, must-revalidate"
+
+header {
+	X-Content-Type-Options nosniff
+	Referrer-Policy strict-origin-when-cross-origin
+	-Server
+}
+
+file_server
+
+handle_errors {
+	@404 expression {err.status_code} == 404
+	handle @404 {
+		rewrite * /404.html
+		file_server
+	}
+}

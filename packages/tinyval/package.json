@@ -2,17 +2,13 @@
   "name": "tinyval",
   "version": "0.1.0",
   "description": "Tiny, fast, zero-dependency validation",
-  "author": "kilkenny",
-  "license": "MIT",
+  "homepage": "https://tinyval.ru/tinyval/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/latfullin/npm-packages.git",
     "directory": "packages/tinyval"
   },
-  "homepage": "https://tinyval.ru/tinyval/",
-  "bugs": {
-    "url": "https://github.com/latfullin/npm-packages/issues"
-  },
+  "bugs": "https://github.com/latfullin/npm-packages/issues",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -58,6 +54,8 @@
     "tiny",
     "zero-dependency"
   ],
+  "author": "kilkenny",
+  "license": "MIT",
   "devDependencies": {
     "@types/node": "^24.19.1",
     "typescript": "^7.0.2"

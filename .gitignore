@@ -6,3 +6,5 @@ site/.vitepress/cache
 site/.vitepress/dist
 test-results
 playwright-report
+
+.env

@@ -7,6 +7,8 @@ Tiny zero-dependency input masks: phones, bank cards, dates, amounts, documents 
 - Visible template `+7 (___) ___-__-__`, date masks reject day 32 and month 13
 - `v-mask` directive for Vue (`tinyval-mask/vue`)
 
+Documentation: **[tinyval.ru/tinyval-mask](https://tinyval.ru/tinyval-mask/)** — guide, API reference and live demo.
+
 ## Install
 
 ```bash

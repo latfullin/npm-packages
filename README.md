@@ -11,6 +11,9 @@
 npm-packages/
 ├── package.json          # npm workspaces + общие команды
 ├── tsconfig.json         # список пакетов для общей сборки (tsc -b)
+├── Dockerfile            # сборка сайта и образ с Caddy
+├── Caddyfile             # кэш, 404 и заголовки (домены и HTTPS — в репозитории proxy)
+├── docker-compose.yml    # запуск контейнера в общей сети web, за глобальным прокси
 ├── packages/
 │   ├── tinyval-mask/     # маски ввода, без зависимостей
 │   ├── tinyval-phone/    # телефоны всех стран и флаги (данные генерирует scripts/generate.mjs)
@@ -120,10 +123,70 @@ git tag tinyval@0.1.1
 git push --follow-tags
 ```
 
+## Деплой сайта
+
+Сайт собирается в статику и отдаётся через [Caddy](https://caddyserver.com) по http
+внутри docker-сети. Наружу его выставляет **глобальный прокси** — отдельный репозиторий
+`proxy`, один на машину: он держит порты 80 и 443, разбирает домены и выпускает
+сертификаты Let's Encrypt. Поэтому локально и на сервере всё поднимается одинаково.
+
+Файлы: `Dockerfile` (сборка пакетов и сайта → образ с Caddy), `Caddyfile` (кэш, 404,
+заголовки), `docker-compose.yml`, `.env.example`. Домен прописан не здесь, а в
+`proxy/nginx/conf.d/tinyval.ru.conf`.
+
+### Первый запуск
+
+Прокси должен быть запущен — он создаёт сеть `web`, без неё контейнер не поднимется:
+
+```bash
+cd ../proxy && ./up.sh
+
+git clone git@github.com:latfullin/npm-packages.git
+cd npm-packages
+docker compose up -d --build
+```
+
+Локально сайт открывается на http://tinyval.ru/ (нужна строка в `hosts`, см. README
+прокси). На сервере, когда A-запись домена указывает на его IP, остаётся выпустить
+сертификат — один раз, дальше продлевается само:
+
+```bash
+cd ../proxy && ./cert.sh tinyval.ru www.tinyval.ru
+```
+
+### Обновить сайт
+
+```bash
+git pull
+docker compose up -d --build
+```
+
+Старый контейнер заменится новым. Сертификаты лежат в томе прокси и пересборки не касаются.
+
+### Полезное
+
+```bash
+docker compose logs -f         # логи Caddy
+docker compose ps              # состояние, healthcheck ходит на /healthz
+docker compose down            # остановить
+curl -H 'Host: tinyval.ru' http://localhost/        # проверить через прокси, без правки hosts
+docker run --rm -p 8080:80 -e SITE_ADDRESS=:80 tinyval-docs   # проверить образ сам по себе
+```
+
+### Если что-то не так
+
+- **502 от прокси** — контейнер `tinyval-docs` не поднят или переименован: сверьте
+  `docker ps` с `set $upstream` в `proxy/nginx/conf.d/tinyval.ru.conf`.
+- **Сертификат не выпускается** — домен должен резолвиться в IP сервера, а порт 80
+  снаружи быть открыт: через него идёт проверка Let's Encrypt. Логи: `cd ../proxy && docker compose logs certbot`.
+- **Caddy полез за своим сертификатом** — в `.env` в `SITE_ADDRESS` попал домен вместо
+  `:80`. За https отвечает прокси, Caddy должен слушать только http.
+- **После деплоя видна старая страница** — HTML отдаётся с `must-revalidate`, но CDN перед сервером может кэшировать; сбросьте кэш там.
+
 ## Добавить новый пакет
 
 1. Скопировать `packages/tinyval` в `packages/<имя>`, удалить `dist` и `.tsbuildinfo`.
-2. В `packages/<имя>/package.json` поменять `name`, `version` (`0.1.0`), `description`, `keywords`.
+2. В `packages/<имя>/package.json` поменять `name`, `version` (`0.1.0`), `description`, `keywords`, `homepage` (`https://tinyval.ru/<имя>/`) и `directory` в `repository`.
 3. Добавить пакет в `references` корневого `tsconfig.json`:
    ```json
    { "path": "packages/<имя>" }
