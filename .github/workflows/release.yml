@@ -1,0 +1,55 @@
+# Версии и публикация пакетов через Changesets.
+#
+# Как это работает:
+#   1. К изменению прикладывается описание: npx changeset (файл в .changeset/)
+#   2. Описания мержатся в main вместе с кодом
+#   3. Этот workflow видит их и открывает PR «Релиз»: поднятые версии, переписанные CHANGELOG
+#   4. Мерж PR «Релиз» убирает описания — и тогда этот же workflow публикует пакеты на npm
+#
+# Нужен секрет NPM_TOKEN (npmjs.com → Access Tokens → Granular, Read and write, с обходом 2FA).
+# Чтобы workflow мог открывать PR: Settings → Actions → General →
+# Workflow permissions → Read and write + Allow GitHub Actions to create and approve pull requests.
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Версии и публикация
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # коммит с версиями в ветку PR «Релиз»
+      pull-requests: write # сам PR
+      id-token: write # provenance на npm, когда репозиторий публичный
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # changesets сравнивает с baseBranch, поэтому нужна история, а не один коммит
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          registry-url: https://registry.npmjs.org
+      - run: npm ci
+
+      # Сборка нужна обеим ветвям: и чтобы проверить версии, и чтобы публиковать dist
+      - run: npm run build -w packages
+
+      - uses: changesets/action@v1
+        with:
+          # Есть описания → открыть/обновить PR «Релиз». Описаний нет → опубликовать
+          version: npx changeset version
+          publish: npx changeset publish
+          commit: 'chore: версии пакетов'
+          title: 'Релиз: версии пакетов'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: ${{ !github.event.repository.private }}

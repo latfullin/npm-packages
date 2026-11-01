@@ -6,5 +6,7 @@ site/.vitepress/cache
 site/.vitepress/dist
 test-results
 playwright-report
+# vite пишет их рядом с [page].paths.ts на время сборки
+*.timestamp-*.mjs
 
 .env
