@@ -83,6 +83,26 @@ npm pack --dry-run -w tinyval
 
 ## Публикация на npm
 
+### Автоматически, из GitHub Actions
+
+Публикует `.github/workflows/publish.yml`: `scripts/publish.mjs` сравнивает версию каждого
+пакета с реестром и отправляет только те, которых там ещё нет. Поднимать версию в
+`package.json` всё равно нужно вручную — это и есть решение «выпускаем».
+
+```bash
+npm version patch -w tinyval --no-git-tag-version   # 0.1.0 → 0.1.1
+git commit -am "tinyval@0.1.1"
+git tag v0.1.1 && git push --follow-tags            # тег v* запускает публикацию
+```
+
+- Повторный запуск безопасен: уже опубликованные версии пропускаются, перезалить версию npm и так не даёт.
+- Порядок зависимостей соблюдается (`order` в `scripts/publish.mjs`): сначала `tinyval` и `tinyval-mask`, потом зависящие от них.
+- Версия с дефисом (`0.2.0-beta.1`) уходит под тегом `next`, то есть `npm install` её не поставит.
+- Сначала проверить без публикации: вкладка **Actions → Publish → Run workflow**, галка dry run включена по умолчанию.
+- Нужен секрет `NPM_TOKEN` (npmjs.com → Access Tokens → Granular, Read and write, с обходом 2FA).
+
+### Вручную
+
 Один раз:
 
 ```bash
@@ -154,7 +174,33 @@ docker compose up -d --build
 cd ../proxy && ./cert.sh tinyval.ru www.tinyval.ru
 ```
 
-### Обновить сайт
+### Автодеплой по пушу в main
+
+`.github/workflows/deploy.yml`: GitHub подключается к серверу по SSH, делает
+`git reset --hard` на пришедший коммит, `docker compose up -d --build` и проверяет,
+что сайт отвечает 200. Запускается только если менялось то, что попадает в образ
+(`packages/`, `site/`, `Dockerfile`, `Caddyfile`, манифесты), либо вручную из Actions.
+
+Секреты (Settings → Secrets and variables → Actions):
+
+| Секрет | Зачем |
+| --- | --- |
+| `DEPLOY_HOST` | адрес сервера |
+| `DEPLOY_USER` | пользователь для SSH |
+| `DEPLOY_SSH_KEY` | приватный ключ целиком, со строками BEGIN/END |
+| `DEPLOY_PATH` | путь к клону на сервере, например `/srv/npm-packages` |
+| `DEPLOY_PORT` | порт SSH, если не 22 (необязательно) |
+
+Переменная `DEPLOY_URL` (вкладка Variables) — что проверять после деплоя, по умолчанию
+`https://tinyval.ru/`.
+
+На сервере заранее: клон репозитория в `DEPLOY_PATH`, публичный ключ в
+`~/.ssh/authorized_keys`, пользователь в группе `docker`, запущенный прокси
+(`../proxy/up.sh` создаёт сеть `web`). Сервер должен быть доступен снаружи по SSH —
+GitHub приходит сам. Для машины за NAT (в том числе WSL) это не работает: там нужен
+self-hosted runner или `git pull` по таймеру.
+
+### Обновить сайт вручную
 
 ```bash
 git pull
