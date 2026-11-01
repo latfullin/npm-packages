@@ -1,12 +1,15 @@
-# Публикация на npm: пакеты, чьей версии ещё нет в реестре (scripts/publish.mjs).
-# Запуск — тег v* (git tag v0.1.1 && git push origin v0.1.1) или вручную во вкладке Actions (по умолчанию dry run).
+# Запасная публикация на npm: пакеты, чьей версии ещё нет в реестре (scripts/publish.mjs).
+#
+# Обычный путь релиза — Changesets, см. .github/workflows/release.yml. Этот workflow
+# оставлен на случай, когда надо опубликовать в обход него: например, PR «Релиз» уже
+# влит, а публикация упала. Поэтому только ручной запуск, по умолчанию dry run —
+# автотриггер по тегу убран, чтобы две публикации не шли одновременно.
+#
 # Нужен секрет NPM_TOKEN: npmjs.com → Access Tokens → Granular, Read and write на пакеты, с обходом 2FA.
 # Provenance включается сам, когда репозиторий станет публичным (для приватных npm его не принимает).
-name: Publish
+name: Publish (вручную)
 
 on:
-  push:
-    tags: ['v*']
   workflow_dispatch:
     inputs:
       dry-run:

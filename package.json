@@ -12,10 +12,12 @@
     "test": "npm test -w packages",
     "size": "node scripts/size.mjs",
     "attw": "for p in packages/*/; do attw --pack \"$p\" --profile esm-only --quiet || exit 1; done",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "changeset": "changeset"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
+    "@changesets/cli": "^3.0.3",
     "@playwright/test": "^1.63.0",
     "concurrently": "^10.0.5",
     "esbuild": "^0.28.2",
