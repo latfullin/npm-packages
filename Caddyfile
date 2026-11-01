@@ -1,7 +1,13 @@
-# Адрес сайта берётся из переменной SITE_ADDRESS (см. docker-compose.yml и .env).
-# Домен -> Caddy сам получит и продлит сертификат Let's Encrypt; :80 -> локальный запуск по HTTP.
-# По желанию можно добавить глобальный блок с почтой для уведомлений об истечении сертификата:
-#   { email you@example.com }
+# За глобальным прокси (проект ../proxy): доверяем заголовкам X-Forwarded-* из
+# приватных подсетей Docker, иначе Caddy считает клиентом сам прокси, а схемой — http.
+{
+	servers {
+		trusted_proxies static private_ranges
+	}
+}
+
+# Адрес берётся из переменной SITE_ADDRESS (см. docker-compose.yml и .env) и равен :80 —
+# внутри сети отдаём http. Домены и сертификаты Let's Encrypt теперь на стороне прокси.
 {$SITE_ADDRESS::80}
 
 root * /srv

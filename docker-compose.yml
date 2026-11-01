@@ -1,20 +1,19 @@
+# Сайт документации. Наружу портов не публикует: 80 и 443 держит глобальный прокси
+# (проект ../proxy), он же терминирует https и выпускает сертификаты.
+# Внутри сети web Caddy отдаёт статику по http.
+#
+# Запуск: сначала ../proxy/up.sh (создаёт сеть web), затем docker compose up -d
 services:
   docs:
     build: .
     image: tinyval-docs
     container_name: tinyval-docs
     restart: unless-stopped
-    ports:
-      - '80:80'
-      - '443:443'
-      - '443:443/udp' # HTTP/3
+    networks: [web]
     environment:
-      # Домены сайта. Caddy выпустит сертификат на каждый из них.
-      SITE_ADDRESS: ${SITE_ADDRESS:-tinyval.ru, www.tinyval.ru}
-    volumes:
-      # Сертификаты Let's Encrypt — иначе при каждом перезапуске выпуск заново (у LE есть лимиты)
-      - caddy_data:/data
-      - caddy_config:/config
+      # :80 — слушаем http внутри сети. Домены и сертификаты теперь дело прокси,
+      # поэтому Caddy к Let's Encrypt не обращается.
+      SITE_ADDRESS: ${SITE_ADDRESS:-:80}
     healthcheck:
       test: ['CMD', 'wget', '-qO-', 'http://127.0.0.1/healthz']
       interval: 30s
@@ -22,6 +21,7 @@ services:
       retries: 3
       start_period: 10s
 
-volumes:
-  caddy_data:
-  caddy_config:
+networks:
+  web:
+    name: web
+    external: true
