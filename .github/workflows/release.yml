@@ -51,5 +51,9 @@ jobs:
           title: 'Релиз: версии пакетов'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # NPM_TOKEN ищет сам changesets/action, NODE_AUTH_TOKEN — npm внутри него.
+          # Без первого action уходит на trusted publishing через OIDC, а он требует
+          # настроенного доверенного публикатора на npmjs.com и иначе падает.
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: ${{ !github.event.repository.private }}
