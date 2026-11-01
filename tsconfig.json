@@ -3,6 +3,7 @@
   "references": [
     { "path": "packages/tinyval" },
     { "path": "packages/tinyval-vue" },
-    { "path": "packages/tinyval-mask" }
+    { "path": "packages/tinyval-mask" },
+    { "path": "packages/tinyval-phone" }
   ]
 }

@@ -25,6 +25,7 @@ export default {
       title: { ru: 'API', en: 'API', zh: 'API' },
       pages: [
         { slug: 'presets', title: { ru: 'Готовые маски', en: 'Ready-made masks', zh: '预设掩码' } },
+        'phoneAuto',
         'createMask',
         { slug: 'mask', title: 'mask, unmask, isComplete' },
         'numberMask',

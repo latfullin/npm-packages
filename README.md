@@ -16,6 +16,7 @@ npm-packages/
 ├── docker-compose.yml    # запуск контейнера в общей сети web, за глобальным прокси
 ├── packages/
 │   ├── tinyval-mask/     # маски ввода, без зависимостей
+│   ├── tinyval-phone/    # телефоны всех стран и флаги (данные генерирует scripts/generate.mjs)
 │   ├── tinyval-vue/      # формы во Vue на tinyval (зависит от tinyval)
 │   └── tinyval/          # пакет
 │       ├── src/          # исходники
@@ -102,7 +103,7 @@ npm publish -w tinyval
 
 ### Пакеты, которые зависят друг от друга
 
-`tinyval-vue` указывает `tinyval` в `peerDependencies`. Если в tinyval вышли изменения, которые нужны tinyval-vue, публикуйте сначала `tinyval`, потом `tinyval-vue`, и поднимите в нём версию в `peerDependencies`.
+`tinyval-vue` указывает `tinyval` в `peerDependencies`. Если в tinyval вышли изменения, которые нужны tinyval-vue, публикуйте сначала `tinyval`, потом `tinyval-vue`, и поднимите в нём версию в `peerDependencies`. Так же `tinyval-phone` зависит от `tinyval-mask`: сначала `tinyval-mask`, потом `tinyval-phone`.
 
 ### Какую версию поднимать
 

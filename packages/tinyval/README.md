@@ -2,7 +2,7 @@
 
 Tiny, fast, zero-dependency validation for browser and server.
 
-- ~1.6 kB gzip for a typical form, ~3.2 kB for everything (tree-shakeable)
+- ~2.5 kB gzip for a typical form, ~5.5 kB for everything (tree-shakeable)
 - TypeScript types inferred from the schema
 - Nested objects and arrays, unions, unknown keys handling, coercion, transforms, async checks
 - [Standard Schema](https://standardschema.dev) — works with tRPC, Hono, TanStack Form, React Hook Form and more
@@ -33,7 +33,7 @@ const result = validate(User, input);
 if (result.valid) {
   result.data; // cleaned, typed data (unknown keys removed)
 } else {
-  result.errors; // { name: 'Must be at least 2 long', 'address.city': 'Required' }
+  result.errors; // { name: 'Must be at least 2 characters long', 'address.city': 'Required' }
   result.issues; // [{ code, message, path: ['address', 'city'] }]
 }
 ```
@@ -68,7 +68,7 @@ try {
 | `union([a, b])` | The first matching schema |
 | `variant(key, [objA, objB])` | Objects selected by a tag field, precise errors |
 | `enumOf(Enum)` | Values of a TypeScript `enum` or an `as const` object |
-| `lazy(() => schema)` | Recursive schemas (trees), protected from too deep input |
+| `lazy((value, { parent, root }) => schema)` | Recursive schemas (trees) or a schema chosen by the value / sibling fields; protected from too deep input |
 | `optional(schema, default?)` | Value may be missing; default can be a value or a function |
 | `nullable(schema)` | Value may be `null` |
 | `fallback(schema, value)` | Value used instead of an error (query params, settings) |
@@ -118,6 +118,7 @@ validate(schema, data, {
   messages: ru,                 // messages for this call only (per-request language)
   labels: { email: 'Email' },   // field names for {label}
   maxDepth: 256,                // max nesting for lazy()
+  abortEarly: true,             // stop at the first error (server, no details needed)
 });
 ```
 
@@ -125,7 +126,7 @@ Every issue has `code`, `message`, `path` and `params` (`{ min: 8 }`) — so the
 
 ## Laravel-style errors
 
-`flatten(issues)` returns every message by field: `{ password: ['Must be at least 8 long', 'Invalid format'] }`.
+`flatten(issues)` returns every message by field: `{ password: ['Must be at least 8 characters long', 'Invalid format'] }`.
 
 ```ts
 const result = validate(User, body, { all: true });
@@ -209,6 +210,10 @@ const bigint = (msg?: Message) =>
     typeof value === 'bigint' ? value : fail(ctx, path, isEmpty(value) ? 'required' : 'bigint', msg),
   );
 ```
+
+## Docs
+
+Full documentation with live examples (ru, en, zh): [tinyval.ru/tinyval](https://tinyval.ru/tinyval/).
 
 ## License
 

@@ -93,6 +93,10 @@ const draft = useDraft(form, 'new-post');
 useLeaveGuard(form, { onBeforeRouteLeave });
 ```
 
+## Docs
+
+Full documentation with live examples (ru, en, zh): [tinyval.ru/tinyval-vue](https://tinyval.ru/tinyval-vue/).
+
 ## License
 
 MIT

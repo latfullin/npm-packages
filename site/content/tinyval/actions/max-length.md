@@ -44,7 +44,8 @@ function maxLength(max: number, msg?: Message): Action<{ length: number }>
 ::: ru
 | Код | Когда | Сообщение по умолчанию |
 | --- | --- | --- |
-| `maxLength` | Длина больше `max` | Must be at most &#123;max&#125; long |
+| `maxLength` | Строка длиннее `max` | Must be at most &#123;max&#125; &#123;max&#124;character&#124;characters&#125; long |
+| `maxItems` | Массив длиннее `max` | Must have at most &#123;max&#125; &#123;max&#124;item&#124;items&#125; |
 
 Тексты можно поменять: см. [Сообщения и локализация](~/guide/messages).
 :::
@@ -52,7 +53,8 @@ function maxLength(max: number, msg?: Message): Action<{ length: number }>
 ::: en
 | Code | When | Default message |
 | --- | --- | --- |
-| `maxLength` | Length is greater than `max` | Must be at most &#123;max&#125; long |
+| `maxLength` | A string is longer than `max` | Must be at most &#123;max&#125; &#123;max&#124;character&#124;characters&#125; long |
+| `maxItems` | An array has more than `max` items | Must have at most &#123;max&#125; &#123;max&#124;item&#124;items&#125; |
 
 You can change the texts: see [Messages & i18n](~/guide/messages).
 :::
@@ -60,7 +62,8 @@ You can change the texts: see [Messages & i18n](~/guide/messages).
 ::: zh
 | 代码 | 触发条件 | 默认信息 |
 | --- | --- | --- |
-| `maxLength` | 长度大于 `max` | Must be at most &#123;max&#125; long |
+| `maxLength` | 字符串长于 `max` | Must be at most &#123;max&#125; &#123;max&#124;character&#124;characters&#125; long |
+| `maxItems` | 数组元素多于 `max` | Must have at most &#123;max&#125; &#123;max&#124;item&#124;items&#125; |
 
 可以修改这些文本：见 [错误信息与国际化](~/guide/messages)。
 :::

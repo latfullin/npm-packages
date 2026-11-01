@@ -28,6 +28,8 @@ export interface Ctx {
   pending: Promise<void>[];
   root: unknown;
   all: boolean;
+  // остановить всю проверку на первой ошибке
+  abort: boolean;
   messages?: Record<string, Message>;
   labels: Map<string, string>;
   depth: number;
@@ -129,6 +131,33 @@ export function fail(
   return FAIL;
 }
 
+// {min|символ|символа|символов} — форма слова по числу из параметра, по правилам языка ($locale в lang-файле)
+const CATEGORIES = ['zero', 'one', 'two', 'few', 'many', 'other'];
+const pluralRules = new Map<string, { rules: Intl.PluralRules; order: string[] }>();
+
+function plural(n: number, forms: string[], locale: string): string {
+  let r = pluralRules.get(locale);
+  if (!r) {
+    let rules: Intl.PluralRules;
+    try {
+      rules = new Intl.PluralRules(locale);
+    } catch {
+      rules = new Intl.PluralRules('en');
+    }
+    const present = rules.resolvedOptions().pluralCategories as string[];
+    pluralRules.set(locale, (r = { rules, order: CATEGORIES.filter((c) => present.includes(c)) }));
+  }
+  const i = r.order.indexOf(r.rules.select(n));
+  return forms[Math.min(i, forms.length - 1)] ?? '';
+}
+
+export function interpolate(text: string, params: Record<string, unknown>, locale = 'en'): string {
+  return text.replace(/\{(\w+)(?:\|([^}]*))?\}/g, (s, k: string, forms?: string) => {
+    if (!(k in params)) return s;
+    return forms === undefined ? String(params[k]) : plural(Number(params[k]), forms.split('|'), locale);
+  });
+}
+
 const own = <T>(o: Record<string, T> | undefined, k: string): T | undefined => (o && has(o, k) ? o[k] : undefined);
 
 function format(i: RawIssue, ctx: Ctx): Issue {
@@ -154,7 +183,9 @@ function format(i: RawIssue, ctx: Ctx): Issue {
     path: i.path,
     params: i.params,
     message:
-      typeof m === 'function' ? m(params) : m.replace(/\{(\w+)\}/g, (s, k) => (k in params ? String(params[k]) : s)),
+      typeof m === 'function'
+        ? m(params)
+        : interpolate(m, params, String(own(ctx.messages, '$locale') ?? messages.$locale ?? 'en')),
   };
 }
 
@@ -167,6 +198,8 @@ export interface Options {
   labels?: Record<string, string>;
   // Максимальная вложенность рекурсивных схем (lazy)
   maxDepth?: number;
+  // Остановить проверку на первой ошибке — быстрее на сервере, когда подробности не нужны
+  abortEarly?: boolean;
 }
 
 export type Result<T> =
@@ -189,6 +222,7 @@ function start(schema: Schema, value: unknown, opts?: Options): [Ctx, unknown] {
     pending: [],
     root: value,
     all: !!opts?.all,
+    abort: !!opts?.abortEarly,
     messages: opts?.messages,
     labels: new Map(opts?.labels ? Object.entries(opts.labels) : undefined),
     depth: 0,

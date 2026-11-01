@@ -44,7 +44,8 @@ function minLength(min: number, msg?: Message): Action<{ length: number }>
 ::: ru
 | Код | Когда | Сообщение по умолчанию |
 | --- | --- | --- |
-| `minLength` | Длина меньше `min` | Must be at least &#123;min&#125; long |
+| `minLength` | Строка короче `min` | Must be at least &#123;min&#125; &#123;min&#124;character&#124;characters&#125; long |
+| `minItems` | Массив короче `min` | Must have at least &#123;min&#125; &#123;min&#124;item&#124;items&#125; |
 
 Тексты можно поменять: см. [Сообщения и локализация](~/guide/messages).
 :::
@@ -52,7 +53,8 @@ function minLength(min: number, msg?: Message): Action<{ length: number }>
 ::: en
 | Code | When | Default message |
 | --- | --- | --- |
-| `minLength` | Length is less than `min` | Must be at least &#123;min&#125; long |
+| `minLength` | A string is shorter than `min` | Must be at least &#123;min&#125; &#123;min&#124;character&#124;characters&#125; long |
+| `minItems` | An array has fewer than `min` items | Must have at least &#123;min&#125; &#123;min&#124;item&#124;items&#125; |
 
 You can change the texts: see [Messages & i18n](~/guide/messages).
 :::
@@ -60,7 +62,8 @@ You can change the texts: see [Messages & i18n](~/guide/messages).
 ::: zh
 | 代码 | 触发条件 | 默认信息 |
 | --- | --- | --- |
-| `minLength` | 长度小于 `min` | Must be at least &#123;min&#125; long |
+| `minLength` | 字符串短于 `min` | Must be at least &#123;min&#125; &#123;min&#124;character&#124;characters&#125; long |
+| `minItems` | 数组元素少于 `min` | Must have at least &#123;min&#125; &#123;min&#124;item&#124;items&#125; |
 
 可以修改这些文本：见 [错误信息与国际化](~/guide/messages)。
 :::

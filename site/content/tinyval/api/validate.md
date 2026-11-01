@@ -33,6 +33,7 @@ function validate<S extends Schema>(schema: S, value: unknown, options?: Options
 | `messages` | `Record<string, Message>` | — | Сообщения только для этого вызова — например, язык текущего запроса. Чего нет — берётся из [`setMessages`](~/api/set-messages) |
 | `labels` | `Record<string, string>` | — | Названия полей для `{label}` по пути: `{ email: 'Почта', 'address.city': 'Город' }`. См. [label](~/schemas/label) |
 | `maxDepth` | `number` | `256` | Максимальная вложенность рекурсивных схем [`lazy`](~/schemas/lazy) |
+| `abortEarly` | `boolean` | `false` | Остановить проверку на первой ошибке. В результате будет одна ошибка — быстрее на сервере, когда подробности не нужны. Для форм не подходит |
 
 ## Возвращает
 
@@ -61,6 +62,7 @@ function validate<S extends Schema>(schema: S, value: unknown, options?: Options
 | `messages` | `Record<string, Message>` | — | Messages for this call only — e.g. the language of the current request. Missing ones come from [`setMessages`](~/api/set-messages) |
 | `labels` | `Record<string, string>` | — | Field names for `{label}` by path: `{ email: 'Email', 'address.city': 'City' }`. See [label](~/schemas/label) |
 | `maxDepth` | `number` | `256` | Maximum nesting of recursive [`lazy`](~/schemas/lazy) schemas |
+| `abortEarly` | `boolean` | `false` | Stop validation at the first error. The result has one error — faster on the server when details aren't needed. Not for forms |
 
 ## Returns
 
@@ -89,6 +91,7 @@ If the schema contains [`checkAsync`](~/actions/check-async), `validate` throws 
 | `messages` | `Record<string, Message>` | — | 仅用于本次调用的信息 —— 例如当前请求的语言。缺少的信息取自 [`setMessages`](~/api/set-messages) |
 | `labels` | `Record<string, string>` | — | 按路径指定 `{label}` 的字段名称：`{ email: '邮箱', 'address.city': '城市' }`。见 [label](~/schemas/label) |
 | `maxDepth` | `number` | `256` | 递归 Schema [`lazy`](~/schemas/lazy) 的最大嵌套层级 |
+| `abortEarly` | `boolean` | `false` | 遇到第一个错误即停止校验。结果中只有一个错误 —— 在不需要详细信息的服务端更快。不适用于表单 |
 
 ## 返回值
 
@@ -125,7 +128,7 @@ const Login = object({
 const result = validate(Login, { email: 'bad', password: '123' });
 
 result.valid;  // false
-result.errors; // { email: 'Invalid email', password: 'Must be at least 8 long' }
+result.errors; // { email: 'Invalid email', password: 'Must be at least 8 characters long' }
 ```
 
 ::: ru

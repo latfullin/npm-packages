@@ -37,7 +37,7 @@ test('partial: все поля необязательные', () => {
   const Update = partial(User);
   assert.deepEqual(validate(Update, {}).data, {});
   assert.deepEqual(validate(Update, { name: 'Ivan' }).data, { name: 'Ivan' });
-  assert.deepEqual(validate(Update, { name: 'I' }).errors, { name: 'Must be at least 2 long' });
+  assert.deepEqual(validate(Update, { name: 'I' }).errors, { name: 'Must be at least 2 characters long' });
 });
 
 test('partial: только перечисленные поля', () => {
@@ -94,7 +94,7 @@ test('record', () => {
   assert.deepEqual(validate(record(number()), { a: 1, b: 2 }).data, { a: 1, b: 2 });
   assert.deepEqual(validate(record(number()), { a: 1, b: 'x' }).errors, { b: 'Must be a number' });
   const prices = record(pipe(string(), minLength(3)), number());
-  assert.deepEqual(validate(prices, { ab: 1 }).errors, { ab: 'Must be at least 3 long' });
+  assert.deepEqual(validate(prices, { ab: 1 }).errors, { ab: 'Must be at least 3 characters long' });
   const r = validate(record(number()), JSON.parse('{"__proto__": 1}'));
   assert.equal(r.valid, true);
   assert.equal(Object.getPrototypeOf(r.data), Object.prototype);
@@ -104,7 +104,7 @@ test('record', () => {
 test('tuple', () => {
   const point = tuple([number(), number()]);
   assert.deepEqual(validate(point, [1, 2]).data, [1, 2]);
-  assert.deepEqual(validate(point, [1]).errors, { '': 'Must be exactly 2 long' });
+  assert.deepEqual(validate(point, [1]).errors, { '': 'Must have exactly 2 items' });
   assert.deepEqual(validate(point, [1, 'x']).errors, { 1: 'Must be a number' });
 });
 
@@ -121,7 +121,7 @@ test('enumOf: строковые и числовые enum, объекты as con
 test('flatten: все ошибки по полям, как в Laravel', () => {
   const s = object({ code: pipe(string(), minLength(5), email()) });
   const r = validate(s, { code: 'ab', x: 1 }, { all: true });
-  assert.deepEqual(flatten(r.issues), { code: ['Must be at least 5 long', 'Invalid email'] });
+  assert.deepEqual(flatten(r.issues), { code: ['Must be at least 5 characters long', 'Invalid email'] });
 });
 
 test('Standard Schema', async () => {

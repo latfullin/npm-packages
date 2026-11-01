@@ -81,15 +81,15 @@ export default {
 ```
 
 ::: ru
-`satisfies Messages` — TypeScript проверит, что в файле есть все коды ошибок, и подскажет их названия. Если нужно поменять только несколько текстов, файл не нужен целиком — достаточно [`setMessages`](~/api/set-messages) с этими ключами.
+`satisfies Messages` — TypeScript проверит, что в файле есть все коды ошибок, и подскажет их названия. Ключ `$locale` (`'ru'`, `'en'`…) задаёт язык для [склонений](~/guide/messages#склонения-3-символа-5-символов) вроде `{min|символ|символа|символов}`. Если нужно поменять только несколько текстов, файл не нужен целиком — достаточно [`setMessages`](~/api/set-messages) с этими ключами.
 :::
 
 ::: en
-`satisfies Messages` makes TypeScript check that the file has every error code and suggests their names. To change just a few texts you don't need the whole file — [`setMessages`](~/api/set-messages) with those keys is enough.
+`satisfies Messages` makes TypeScript check that the file has every error code and suggests their names. The `$locale` key (`'ru'`, `'en'`…) sets the language for [plural forms](~/guide/messages#plural-forms-1-character-5-characters) like `{min|character|characters}`. To change just a few texts you don't need the whole file — [`setMessages`](~/api/set-messages) with those keys is enough.
 :::
 
 ::: zh
-`satisfies Messages` 让 TypeScript 检查文件中是否包含所有错误代码，并提示它们的名称。如果只需修改少数文本，不需要整个文件 —— 用这些键调用 [`setMessages`](~/api/set-messages) 即可。
+`satisfies Messages` 让 TypeScript 检查文件中是否包含所有错误代码，并提示它们的名称。`$locale` 键（`'ru'`、`'en'`…）决定 `{min|character|characters}` 这类[复数形式](~/guide/messages)使用的语言。如果只需修改少数文本，不需要整个文件 —— 用这些键调用 [`setMessages`](~/api/set-messages) 即可。
 :::
 
 ::: ru

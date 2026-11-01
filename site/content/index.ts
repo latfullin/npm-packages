@@ -2,6 +2,7 @@
 import tinyval from './tinyval/meta';
 import tinyvalVue from './tinyval-vue/meta';
 import tinyvalMask from './tinyval-mask/meta';
+import tinyvalPhone from './tinyval-phone/meta';
 import type { PackageMeta } from './types';
 
-export const packages: PackageMeta[] = [tinyval, tinyvalVue, tinyvalMask];
+export const packages: PackageMeta[] = [tinyval, tinyvalVue, tinyvalMask, tinyvalPhone];

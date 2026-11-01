@@ -59,6 +59,7 @@ export function numberMask(options: NumberMaskOptions = {}): Mask {
         value,
         raw: (neg ? '-' : '') + int + (dec ? `.${frac}` : ''),
         complete: !!int,
+        valid: !!int,
         slots,
         overflow: false,
       };

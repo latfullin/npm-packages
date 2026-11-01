@@ -18,9 +18,11 @@ What the mask functions return and what ends up in the field, in `v-model` and i
 | [`mask(value, m)`](~/api/mask) | Строку для поля | `'+7 (999) 123-45-67'` |
 | [`unmask(value, m)`](~/api/mask) | Строку для данных и базы | `'79991234567'` |
 | [`isComplete(value, m)`](~/api/mask) | `true`, если все обязательные позиции заполнены | `true` |
+| [`isValid(value, m)`](~/api/mask) | `true`, если заполнено и правильно по смыслу (дата существует, контрольная сумма сходится) | `true` |
 | `m.process(value)` | Всё сразу — объект `MaskResult`, см. ниже | |
 | [`attach`](~/api/attach) → `onChange` | `{ value, raw, complete }` при каждом изменении поля | |
 | [`v-mask`](~/api/v-mask) + `v-model` | В модели — строка **с маской** | `'+7 (999) 123-45-67'` |
+| [`v-mask.raw`](~/api/v-mask) + `v-model` | В модели — значение **без маски**, как у `unmask` | `'79991234567'` |
 
 Все функции возвращают **строки**: даже числовая маска отдаёт `'1234.5'`, а не `1234.5` — чтобы не терять ведущие нули и точность. Число получают через `Number(...)` или [`coerce.number`](@/tinyval/schemas/coerce).
 :::
@@ -33,9 +35,11 @@ What the mask functions return and what ends up in the field, in `v-model` and i
 | [`mask(value, m)`](~/api/mask) | A string for the field | `'+7 (999) 123-45-67'` |
 | [`unmask(value, m)`](~/api/mask) | A string for data and the database | `'79991234567'` |
 | [`isComplete(value, m)`](~/api/mask) | `true` if all required positions are filled | `true` |
+| [`isValid(value, m)`](~/api/mask) | `true` if filled and correct (the date exists, the checksum matches) | `true` |
 | `m.process(value)` | Everything at once — a `MaskResult` object, see below | |
 | [`attach`](~/api/attach) → `onChange` | `{ value, raw, complete }` on every field change | |
 | [`v-mask`](~/api/v-mask) + `v-model` | The model holds the string **with the mask** | `'+7 (999) 123-45-67'` |
+| [`v-mask.raw`](~/api/v-mask) + `v-model` | The model holds the **unmasked** value, like `unmask` | `'79991234567'` |
 
 All functions return **strings**: even the number mask returns `'1234.5'`, not `1234.5` — so leading zeros and precision aren't lost. Get a number with `Number(...)` or [`coerce.number`](@/tinyval/schemas/coerce).
 :::
@@ -48,9 +52,11 @@ All functions return **strings**: even the number mask returns `'1234.5'`, not `
 | [`mask(value, m)`](~/api/mask) | 用于输入框的字符串 | `'+7 (999) 123-45-67'` |
 | [`unmask(value, m)`](~/api/mask) | 用于数据和数据库的字符串 | `'79991234567'` |
 | [`isComplete(value, m)`](~/api/mask) | 所有必填位置都已填写时为 `true` | `true` |
+| [`isValid(value, m)`](~/api/mask) | 已填写且正确（日期存在、校验和正确）时为 `true` | `true` |
 | `m.process(value)` | 一次返回全部信息 —— `MaskResult` 对象，见下文 | |
 | [`attach`](~/api/attach) → `onChange` | 每次输入框变化时得到 `{ value, raw, complete }` | |
 | [`v-mask`](~/api/v-mask) + `v-model` | 模型中是**带掩码**的字符串 | `'+7 (999) 123-45-67'` |
+| [`v-mask.raw`](~/api/v-mask) + `v-model` | 模型中是**去掉掩码**的值，与 `unmask` 相同 | `'79991234567'` |
 
 所有函数都返回**字符串**：即使是数字掩码也返回 `'1234.5'` 而不是 `1234.5` —— 以免丢失前导零和精度。如需数字，请使用 `Number(...)` 或 [`coerce.number`](@/tinyval/schemas/coerce)。
 :::
@@ -136,6 +142,7 @@ phone().process('8999123');
   "value": "+7 (999) 123",
   "raw": "999123",
   "complete": false,
+  "valid": false,
   "slots": [4, 5, 6, 9, 10, 11],
   "overflow": false
 }
@@ -147,6 +154,7 @@ phone().process('8999123');
 | `value` | Отформатированное значение — то же, что вернёт `mask` |
 | `raw` | Введённые символы на позициях шаблона, без литералов. У телефона здесь **нет** кода страны: `+7` — часть шаблона. Поэтому для данных используйте `unmask`, а не `raw` |
 | `complete` | Все обязательные позиции заполнены — то же, что `isComplete` |
+| `valid` | Заполнено и правильно по смыслу — то же, что `isValid` |
 | `slots` | Индексы введённых символов в `value` — по ним ставится курсор |
 | `overflow` | Во вводе остались символы, которые не поместились: `process('1234567')` для `'99-99'` → `true` |
 
@@ -159,6 +167,7 @@ phone().process('8999123');
 | `value` | The formatted value — the same as `mask` returns |
 | `raw` | Typed characters in pattern positions, without literals. For a phone it has **no** country code: `+7` is part of the pattern. So use `unmask`, not `raw`, for data |
 | `complete` | All required positions are filled — the same as `isComplete` |
+| `valid` | Filled and correct — the same as `isValid` |
 | `slots` | Indexes of typed characters in `value` — the caret is placed by them |
 | `overflow` | The input had characters that didn't fit: `process('1234567')` for `'99-99'` → `true` |
 
@@ -171,6 +180,7 @@ Why `raw` and `unmask` differ: `raw` is the mask's internal value (the caret is 
 | `value` | 格式化后的值 —— 与 `mask` 的返回值相同 |
 | `raw` | 模板位置上已输入的字符，不含字面量。对于电话，这里**不包含**国家代码：`+7` 是模板的一部分。因此数据请使用 `unmask` 而不是 `raw` |
 | `complete` | 所有必填位置都已填写 —— 与 `isComplete` 相同 |
+| `valid` | 已填写且正确 —— 与 `isValid` 相同 |
 | `slots` | 已输入字符在 `value` 中的索引 —— 用于定位光标 |
 | `overflow` | 输入中有放不下的字符：对 `'99-99'` 调用 `process('1234567')` → `true` |
 
@@ -185,8 +195,8 @@ Why `raw` and `unmask` differ: `raw` is the mask's internal value (the caret is 
 | Где | Значение |
 | --- | --- |
 | В `<input>` | `+7 (999) 123-45-67` |
-| В `v-model` | `'+7 (999) 123-45-67'` — то же, что в поле |
-| В `onChange` у `attach` | `{ value: '+7 (999) 123-45-67', raw: '79991234567', complete: true }` — здесь `raw` уже результат `unmask` |
+| В `v-model` | `'+7 (999) 123-45-67'` — то же, что в поле; с `v-mask.raw` — `'79991234567'` |
+| В `onChange` у `attach` | `{ value: '+7 (999) 123-45-67', raw: '79991234567', complete: true, valid: true }` — здесь `raw` уже результат `unmask` |
 | В данных для сервера | `'79991234567'` — после `unmask` в схеме, см. [Маски и валидация](~/guide/validation) |
 
 Модель хранит значение с маской специально: так поле и модель всегда совпадают, а «чистое» значение получается в одном месте — в схеме перед отправкой.
@@ -200,8 +210,8 @@ With [`v-mask`](~/api/v-mask) or [`attach`](~/api/attach):
 | Where | Value |
 | --- | --- |
 | In the `<input>` | `+7 (999) 123-45-67` |
-| In `v-model` | `'+7 (999) 123-45-67'` — the same as in the field |
-| In `attach`'s `onChange` | `{ value: '+7 (999) 123-45-67', raw: '79991234567', complete: true }` — here `raw` is already the `unmask` result |
+| In `v-model` | `'+7 (999) 123-45-67'` — the same as in the field; with `v-mask.raw` — `'79991234567'` |
+| In `attach`'s `onChange` | `{ value: '+7 (999) 123-45-67', raw: '79991234567', complete: true, valid: true }` — here `raw` is already the `unmask` result |
 | In data for the server | `'79991234567'` — after `unmask` in the schema, see [Masks & validation](~/guide/validation) |
 
 The model keeps the masked value on purpose: the field and the model always match, and the "clean" value is produced in one place — in the schema before sending.
@@ -215,8 +225,8 @@ The model keeps the masked value on purpose: the field and the model always matc
 | 位置 | 值 |
 | --- | --- |
 | `<input>` 中 | `+7 (999) 123-45-67` |
-| `v-model` 中 | `'+7 (999) 123-45-67'` —— 与输入框中相同 |
-| `attach` 的 `onChange` 中 | `{ value: '+7 (999) 123-45-67', raw: '79991234567', complete: true }` —— 这里的 `raw` 已经是 `unmask` 的结果 |
+| `v-model` 中 | `'+7 (999) 123-45-67'` —— 与输入框中相同；使用 `v-mask.raw` 时为 `'79991234567'` |
+| `attach` 的 `onChange` 中 | `{ value: '+7 (999) 123-45-67', raw: '79991234567', complete: true, valid: true }` —— 这里的 `raw` 已经是 `unmask` 的结果 |
 | 发送给服务端的数据中 | `'79991234567'` —— 在 Schema 中经过 `unmask` 之后，见 [掩码与校验](~/guide/validation) |
 
 模型有意保存带掩码的值：这样输入框和模型始终一致，而“纯”值只在一个地方生成 —— 提交前在 Schema 中处理。
