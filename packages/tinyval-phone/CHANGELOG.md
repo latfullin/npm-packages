@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.1
+
+### Patch Changes
+
+- 9d50d3c: Ссылка на документацию ведёт на сайт: `homepage` — `https://tinyval.ru/<пакет>/`, в README добавлен раздел «Docs»
+- Updated dependencies [9d50d3c]
+  - tinyval-mask@0.1.1
+
 ## 0.1.0
 
 First release.

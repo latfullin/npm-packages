@@ -1,6 +1,6 @@
 {
   "name": "tinyval-mask",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Tiny zero-dependency input masks: phones, cards, dates, numbers, documents, custom patterns",
   "homepage": "https://tinyval.ru/tinyval-mask/",
   "repository": {
