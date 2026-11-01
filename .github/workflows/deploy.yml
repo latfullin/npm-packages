@@ -1,0 +1,124 @@
+# Деплой сайта документации: GitHub подключается по SSH к серверу и пересобирает контейнер.
+#
+# Нужны секреты (Settings → Secrets and variables → Actions):
+#   DEPLOY_HOST — адрес сервера (IP или домен), куда ходить по SSH
+#   DEPLOY_USER — пользователь на сервере
+#   DEPLOY_SSH_KEY — приватный ключ целиком, включая строки BEGIN/END
+#   DEPLOY_PATH — путь к клону репозитория на сервере, например /srv/npm-packages
+# Необязательные:
+#   DEPLOY_PORT — порт SSH, если не 22
+#   DEPLOY_URL — что проверить после деплоя, по умолчанию https://tinyval.ru/
+#
+# На сервере заранее: клон репозитория в DEPLOY_PATH, запущенный глобальный прокси
+# (../proxy/up.sh создаёт сеть web), публичный ключ в ~/.ssh/authorized_keys.
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+    # Деплоить только когда менялось то, что попадает в образ
+    paths:
+      - 'packages/**'
+      - 'site/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tsconfig.json'
+      - 'Dockerfile'
+      - 'Caddyfile'
+      - 'docker-compose.yml'
+      - '.dockerignore'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+
+# Два деплоя одновременно сломают друг другу сборку; очередь, без отмены начатого
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Сборка и перезапуск на сервере
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ vars.DEPLOY_URL || 'https://tinyval.ru/' }}
+    steps:
+      - name: Проверить, что секреты заданы
+        env:
+          HOST: ${{ secrets.DEPLOY_HOST }}
+          USER: ${{ secrets.DEPLOY_USER }}
+          KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          PATH_ON_SERVER: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          missing=
+          for v in HOST USER KEY PATH_ON_SERVER; do
+            [ -n "${!v}" ] || missing="$missing DEPLOY_${v%_ON_SERVER}"
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::Не заданы секреты:$missing — см. комментарий в .github/workflows/deploy.yml"
+            exit 1
+          fi
+
+      - name: Подготовить ключ и known_hosts
+        env:
+          KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          HOST: ${{ secrets.DEPLOY_HOST }}
+          PORT: ${{ secrets.DEPLOY_PORT }}
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          # Ключ хоста берём с самого сервера: иначе StrictHostKeyChecking завалит подключение.
+          # Это доверие при первом контакте — чтобы его исключить, положите known_hosts в секрет.
+          ssh-keyscan -p "${PORT:-22}" -H "$HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          test -s ~/.ssh/known_hosts || { echo "::error::$HOST не отвечает на порту ${PORT:-22}"; exit 1; }
+
+      - name: Пересобрать и перезапустить
+        env:
+          HOST: ${{ secrets.DEPLOY_HOST }}
+          USER: ${{ secrets.DEPLOY_USER }}
+          PORT: ${{ secrets.DEPLOY_PORT }}
+          DIR: ${{ secrets.DEPLOY_PATH }}
+          SHA: ${{ github.sha }}
+          METRIKA_ID: ${{ vars.METRIKA_ID }}
+        run: |
+          ssh -i ~/.ssh/deploy_key -p "${PORT:-22}" \
+              -o BatchMode=yes -o ConnectTimeout=15 \
+              "$USER@$HOST" DIR="$DIR" SHA="$SHA" METRIKA_ID="$METRIKA_ID" 'bash -euo pipefail -s' <<'REMOTE'
+            cd "$DIR"
+
+            # Деплоим ровно тот коммит, который пришёл в main, а не «что было в ветке»
+            git fetch --prune origin main
+            git checkout -q main
+            git reset --hard "$SHA"
+            echo "Деплоим $(git rev-parse --short HEAD): $(git log -1 --pretty=%s)"
+
+            # Сеть web создаёт глобальный прокси; без неё контейнер не поднимется
+            docker network inspect web >/dev/null 2>&1 \
+              || { echo "Сети web нет — запустите глобальный прокси (../proxy/up.sh)"; exit 1; }
+
+            # Счётчик Метрики вшивается при сборке. Берём из .env на сервере, а если
+            # там его нет — из переменной METRIKA_ID репозитория, иначе сайт соберётся без метрики.
+            if [ -n "${METRIKA_ID:-}" ] && ! grep -qs '^METRIKA_ID=' .env; then
+              echo "METRIKA_ID=$METRIKA_ID" >> .env
+            fi
+
+            docker compose up -d --build
+
+            # Образы предыдущих сборок иначе копятся и съедают диск
+            docker image prune -f
+          REMOTE
+
+      - name: Проверить, что сайт отвечает
+        env:
+          URL: ${{ vars.DEPLOY_URL || 'https://tinyval.ru/' }}
+        run: |
+          # Контейнер помечается healthy не мгновенно, даём ему время
+          for i in $(seq 1 10); do
+            code=$(curl -fsS -o /dev/null -w '%{http_code}' --max-time 15 "$URL" || true)
+            [ "$code" = "200" ] && { echo "$URL — $code"; exit 0; }
+            echo "попытка $i: $code, ждём"
+            sleep 6
+          done
+          echo "::error::$URL не отвечает 200 после деплоя"
+          exit 1

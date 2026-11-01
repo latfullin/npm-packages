@@ -13,6 +13,11 @@ RUN npm ci
 
 COPY packages packages
 COPY site site
+
+# Номер счётчика Яндекс.Метрики. Сайт статический, поэтому счётчик вшивается при сборке:
+# без METRIKA_ID его в страницах не будет (так и нужно для локальной сборки).
+ARG METRIKA_ID=
+ENV METRIKA_ID=$METRIKA_ID
 RUN npm run build
 
 
