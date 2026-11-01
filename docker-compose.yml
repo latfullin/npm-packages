@@ -5,7 +5,11 @@
 # Запуск: сначала ../proxy/up.sh (создаёт сеть web), затем docker compose up -d
 services:
   docs:
-    build: .
+    build:
+      context: .
+      args:
+        # Счётчик Метрики вшивается в страницы при сборке образа; задаётся в .env
+        METRIKA_ID: ${METRIKA_ID:-}
     image: tinyval-docs
     container_name: tinyval-docs
     restart: unless-stopped

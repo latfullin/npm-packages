@@ -80,10 +80,11 @@ jobs:
           PORT: ${{ secrets.DEPLOY_PORT }}
           DIR: ${{ secrets.DEPLOY_PATH }}
           SHA: ${{ github.sha }}
+          METRIKA_ID: ${{ vars.METRIKA_ID }}
         run: |
           ssh -i ~/.ssh/deploy_key -p "${PORT:-22}" \
               -o BatchMode=yes -o ConnectTimeout=15 \
-              "$USER@$HOST" DIR="$DIR" SHA="$SHA" 'bash -euo pipefail -s' <<'REMOTE'
+              "$USER@$HOST" DIR="$DIR" SHA="$SHA" METRIKA_ID="$METRIKA_ID" 'bash -euo pipefail -s' <<'REMOTE'
             cd "$DIR"
 
             # Деплоим ровно тот коммит, который пришёл в main, а не «что было в ветке»
@@ -95,6 +96,12 @@ jobs:
             # Сеть web создаёт глобальный прокси; без неё контейнер не поднимется
             docker network inspect web >/dev/null 2>&1 \
               || { echo "Сети web нет — запустите глобальный прокси (../proxy/up.sh)"; exit 1; }
+
+            # Счётчик Метрики вшивается при сборке. Берём из .env на сервере, а если
+            # там его нет — из переменной METRIKA_ID репозитория, иначе сайт соберётся без метрики.
+            if [ -n "${METRIKA_ID:-}" ] && ! grep -qs '^METRIKA_ID=' .env; then
+              echo "METRIKA_ID=$METRIKA_ID" >> .env
+            fi
 
             docker compose up -d --build
 
